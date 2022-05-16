@@ -1,6 +1,6 @@
 # data
 dataset: 'kspon'
-dataset_path: ''
+dataset_path: '/opt/ml/input/kspon_dataset/train'
 transcripts_path: '/opt/ml/input/kospeech/dataset/kspon/transcripts.txt'
 output_unit: 'character'
 
