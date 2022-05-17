@@ -78,6 +78,7 @@ def generate_character_labels(transcripts, labels_dest):
 def generate_character_script(audio_paths, transcripts, labels_dest):
     print('create_script started..')
     # char2id, id2char = load_label(os.path.join(labels_dest, "aihub_labels.csv"))
+    # 만든 csv 파일은 사용하지 않고, 기존의 csv 파일을 사용하겠다.
     path = "/opt/ml/input/kospeech/data/vocab/aihub_character_vocabs.csv"
     char2id, id2char = load_label(path)
 
