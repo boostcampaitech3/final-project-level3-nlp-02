@@ -14,6 +14,7 @@ venv/*
 *.pyc
 .idea
 .ipynb_checkpoints
+/outputs/*
 KoSpeech.egg-info/
 *.out
 *.sh
