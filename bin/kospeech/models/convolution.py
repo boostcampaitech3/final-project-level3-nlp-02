@@ -199,7 +199,9 @@ class MaskCNN(nn.Module):
         output = None
 
         for module in self.sequential:
-            output = module(inputs)
+            print('@@@@@', inputs)
+            print('#####', module)
+            output = module(inputs).cuda()
             mask = torch.BoolTensor(output.size()).fill_(0)
 
             if output.is_cuda:
