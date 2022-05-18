@@ -66,11 +66,10 @@ from kospeech.trainer import (
 )
 
 
-KSPONSPEECH_VOCAB_PATH = '../../../data/vocab/kspon_sentencepiece.vocab'
-KSPONSPEECH_SP_MODEL_PATH = '../../../data/vocab/kspon_sentencepiece.model'
-LIBRISPEECH_VOCAB_PATH = '../../../data/vocab/tokenizer.vocab'
-LIBRISPEECH_TOKENIZER_PATH = '../../../data/vocab/tokenizer.model'
-
+KSPONSPEECH_VOCAB_PATH = '../../../dataset/kspon/kspon_sentencepiece.vocab'
+KSPONSPEECH_SP_MODEL_PATH = '../../../dataset/kspon/kspon_sentencepiece.model'
+LIBRISPEECH_VOCAB_PATH = '../../../dataset/kspon/tokenizer.vocab'
+LIBRISPEECH_TOKENIZER_PATH = '../../../dataset/kspon/tokenizer.model'
 
 def train(config: DictConfig) -> nn.DataParallel:
     random.seed(config.train.seed)
@@ -79,11 +78,19 @@ def train(config: DictConfig) -> nn.DataParallel:
     device = check_envirionment(config.train.use_cuda)
     if hasattr(config.train, "num_threads") and int(config.train.num_threads) > 0:
         torch.set_num_threads(config.train.num_threads)
-  
-    vocab = KsponSpeechVocabulary(
-        f'../../../data/vocab/aihub_{config.train.output_unit}_vocabs.csv',
-        output_unit=config.train.output_unit,
-    )
+
+    if config.train.output_unit == 'subword':
+        vocab = KsponSpeechVocabulary(
+            vocab_path=f'../../../dataset/kspon/kspon_sentencepiece.vocab',
+            output_unit=config.train.output_unit,
+            sp_model_path='../../../dataset/kspon/kspon_sentencepiece.model'
+        )
+
+    else:
+        vocab = KsponSpeechVocabulary(
+            vocab_path=f'./data/vocab/aihub_{config.train.output_unit}_vocabs.csv',
+            output_unit=config.train.output_unit,
+        )
             
     if not config.train.resume:
         epoch_time_step, trainset_list, validset = split_dataset(config, config.train.transcripts_path, vocab)

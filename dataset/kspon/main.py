@@ -66,8 +66,8 @@ def main():
         generate_character_script(audio_paths, transcripts, opt.vocab_dest)
 
     elif opt.output_unit == 'subword':
-        train_sentencepiece(transcripts, opt.savepath, opt.vocab_size)
-        sentence_to_subwords(audio_paths, transcripts, opt.savepath)
+        train_sentencepiece(transcripts=transcripts, datapath=opt.savepath, vocab_size=opt.vocab_size)
+        sentence_to_subwords(audio_paths=audio_paths, transcripts=transcripts, datapath=opt.savepath)
 
     elif opt.output_unit == 'grapheme':
         sentence_to_grapheme(audio_paths, transcripts, opt.vocab_dest)

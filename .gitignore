@@ -18,4 +18,7 @@ venv/*
 KoSpeech.egg-info/
 *.out
 *.sh
-transcripts.txt
+*.txt
+*.model
+*.vocab
+vocab/

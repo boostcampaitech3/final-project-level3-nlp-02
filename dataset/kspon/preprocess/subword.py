@@ -16,13 +16,15 @@ import os
 import sentencepiece as spm
 
 
-def train_sentencepiece(transcripts, datapath: str = './data', vocab_size: int = 5000):
+def train_sentencepiece(transcripts, datapath: str = '../../vocab', vocab_size: int = 10000):
     print('generate_sentencepiece_input..')
 
     if not os.path.exists(datapath):
         os.mkdir(datapath)
 
-    with open('sentencepiece_input.txt', 'w', encoding="utf-8") as f:
+    blank_token = 4 #vocab_size
+
+    with open('../../vocab/sentencepiece_input.txt', 'w', encoding="utf-8") as f:
         for transcript in transcripts:
             f.write(f'{transcript}\n')
 
@@ -39,7 +41,7 @@ def train_sentencepiece(transcripts, datapath: str = './data', vocab_size: int =
     )
 
 
-def sentence_to_subwords(audio_paths: list, transcripts: list, datapath: str = './data'):
+def sentence_to_subwords(audio_paths: list, transcripts: list, datapath: str = '../../vocab'):
     subwords = list()
 
     print('sentence_to_subwords...')
