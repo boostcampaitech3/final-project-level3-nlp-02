@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Search &mdash; KoSpeech latest documentation</title>
+  <title>Search &mdash; Openspeech v0.3.0 documentation</title>
   
 
   
@@ -55,7 +55,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> KoSpeech
+            <a href="index.html" class="icon icon-home"> Openspeech
           
 
           
@@ -63,10 +63,6 @@
 
           
             
-            
-              <div class="version">
-                latest
-              </div>
             
           
 
@@ -92,42 +88,53 @@
             
               <p class="caption"><span class="caption-text">GETTING STARTED</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="notes/intro.html">What’s New</a></li>
-<li class="toctree-l1"><a class="reference internal" href="notes/intro.html#note">Note</a></li>
-<li class="toctree-l1"><a class="reference internal" href="notes/intro.html#kospeech-open-source-toolkit-for-end-to-end-korean-speech-recognition-paper"><em><strong>KoSpeech:  Open-Source Toolkit for End-to-End Korean Speech Recognition [Paper]</strong></em></a></li>
-<li class="toctree-l1"><a class="reference internal" href="notes/intro.html#supported-models">Supported Models</a></li>
-<li class="toctree-l1"><a class="reference internal" href="notes/intro.html#pre-processed-transcripts">Pre-processed Transcripts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="notes/intro.html#introduction">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="notes/intro.html#roadmap">Roadmap</a></li>
-<li class="toctree-l1"><a class="reference internal" href="notes/intro.html#installation">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="notes/intro.html#get-started">Get Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="notes/intro.html#troubleshoots-and-contributing">Troubleshoots and Contributing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="notes/intro.html#citation">Citation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="notes/Preparation.html">KsponSpeech-preprocess</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notes/intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notes/hydra_configs.html">Openspeech’s Hydra configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="notes/configs.html">Openspeech’s configurations</a></li>
 </ul>
-<p class="caption"><span class="caption-text">ARCHITECTURE</span></p>
+<p class="caption"><span class="caption-text">OPENSPEECH MODELS</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="Interface.html">Interface</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Deep%20Speech%202.html">Deep Speech 2</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Listen%20Attend%20Spell.html">Listen, Attend and Spell</a></li>
-<li class="toctree-l1"><a class="reference internal" href="RNN%20Transducer.html">RNN Transducer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Speech%20Transformer.html">Speech Transformer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Jasper.html">Jasper</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Conformer.html">Conformer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Modules.html">Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models/Openspeech Model.html">Openspeech Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models/Openspeech CTC Model.html">Openspeech CTC Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models/Openspeech Encoder Decoder Model.html">Openspeech Encoder Decoder Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models/Openspeech Transducer Model.html">Openspeech Transducer Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models/Openspeech Language Model.html">Openspeech Language Model</a></li>
+</ul>
+<p class="caption"><span class="caption-text">MODEL ARCHITECTURES</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="architectures/Conformer.html">Conformer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architectures/ContextNet.html">ContextNet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architectures/DeepSpeech2.html">DeepSpeech2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architectures/Jasper.html">Jasper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architectures/Listen Attend Spell.html">Listen Attend Spell Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architectures/LSTM LM.html">LSTM Language Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architectures/QuartzNet.html">QuartzNet Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architectures/RNN Transducer.html">RNN Transducer Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architectures/Transformer.html">Transformer Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architectures/Transformer LM.html">Transformer Language Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architectures/Transformer Transducer.html">Transformer Transducer Model</a></li>
+</ul>
+<p class="caption"><span class="caption-text">CORPUS</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="corpus/AISHELL-1.html">AISHELL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="corpus/KsponSpeech.html">KsponSpeech</a></li>
+<li class="toctree-l1"><a class="reference internal" href="corpus/LibriSpeech.html">LibriSpeech</a></li>
 </ul>
 <p class="caption"><span class="caption-text">LIBRARY REFERENCE</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="Checkpoint.html">Checkpoint</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Criterion.html">Criterion</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Data.html">Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Decode.html">Decode</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Evaluator.html">Evaluator</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Optim.html">Optim</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Learning%20Rate%20Schedulers.html">Learning Rate Scheduler</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Trainer.html">Trainer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Vocabs.html">Vocabs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Etc.html">Etc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/Callback.html">Callback</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/Criterion.html">Criterion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/Data Augment.html">Data Augment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/Feature Transform.html">Feature Transform</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/Datasets.html">Datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/Data Loaders.html">Data Loaders</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/Decoders.html">Decoders</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/Encoders.html">Encoders</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/Modules.html">Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/Optim.html">Optim</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/Search.html">Search</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/Tokenizers.html">Tokenizers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/Metric.html">Metric</a></li>
 </ul>
 
             
@@ -143,7 +150,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">KoSpeech</a>
+          <a href="index.html">Openspeech</a>
         
       </nav>
 
@@ -213,7 +220,7 @@
 
   <div role="contentinfo">
     <p>
-        &#169; Copyright 2020, Soohwan Kim.
+        &#169; Copyright 2021, Kim, Soohwan and Ha, Sangchun and Cho, Soyoung.
 
     </p>
   </div>
