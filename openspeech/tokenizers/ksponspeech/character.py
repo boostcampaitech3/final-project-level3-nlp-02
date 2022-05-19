@@ -35,6 +35,7 @@ class KsponSpeechCharacterTokenizerConfigs(TokenizerConfigs):
         default="kspon_character", metadata={"help": "Unit of vocabulary."}
     )
     vocab_path: str = field(
+        # default='/opt/ml/input/kspon_dataset/script/aihub_labels.csv'
         default="../../../aihub_labels.csv", metadata={"help": "Path of vocabulary file."}
     )
 

@@ -2,6 +2,10 @@
 __pycache__/
 *.py[cod]
 *$py.class
+train.sh
+/outputs
+/ctcdecode
+/warp-rnnt
 
 # C extensions
 *.so

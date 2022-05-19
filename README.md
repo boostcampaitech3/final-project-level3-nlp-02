@@ -1,35 +1,195 @@
-<div align="center">
+## Installation
   
-<img src="https://raw.githubusercontent.com/sooftware/openspeech/55e50cb9b3cc3e7a6dfddcd33e6e698cca3dae3b/docs/img/os_logo.png" width=500>
+This project recommends Python 3.7 or higher.  
+We recommend creating a new virtual environment for this project (using virtual env or conda).
   
-  
-<p align="center">
-  <i><a href="https://github.com/sooftware/OpenSpeech/blob/main/CONTRIBUTING.md"><h3> 🤗 Contributing to OpenSpeech 🤗 </h3></a></i>
-  </p>
-  
-</div>
 
+### Prerequisites
   
-<p align="center">
-  <a href="https://github.com/openspeech-team/OpenSpeech/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-informational">
-  <a href="https://pypi.org/project/openspeech-core/"><img src="https://img.shields.io/badge/pypi-v0.3.0-informational">
-  <img src="https://img.shields.io/badge/build-passing-33CF57?&logo=GitHub">
-  <a href="https://openspeech-team.github.io/openspeech/"><img src="https://img.shields.io/badge/docs-passing-33CF57?&logo=GitHub"></a>
-</p>
+* numpy: `pip install numpy` (Refer [here](https://github.com/numpy/numpy) for problem installing Numpy).
+* pytorch: Refer to [PyTorch website](http://pytorch.org/) to install the version w.r.t. your environment.   
+* librosa: `conda install -c conda-forge librosa` (Refer [here](https://github.com/librosa/librosa) for problem installing librosa)
+* torchaudio: `pip install torchaudio==0.6.0` (Refer [here](https://github.com/pytorch/pytorch) for problem installing torchaudio)
+* sentencepiece: `pip install sentencepiece` (Refer [here](https://github.com/google/sentencepiece) for problem installing sentencepiece)
+* pytorch-lightning: `pip install pytorch-lightning` (Refer [here](https://github.com/PyTorchLightning/pytorch-lightning) for problem installing pytorch-lightning)
+* hydra: `pip install hydra-core --upgrade` (Refer [here](https://github.com/facebookresearch/hydra) for problem installing hydra)
+* warp-rnnt: Refer to [warp-rnnt page](https://github.com/1ytic/warp-rnnt) to install the library.
+* ctcdecode: Refer to [ctcdecode page](https://github.com/parlance/ctcdecode) to install the library.
+  
+### Install from pypi
+  
+You can install OpenSpeech with pypi.
+```
+pip install openspeech-core
+```
+  
+### Install from source
+Currently we only support installation from source code using setuptools. Checkout the source code and run the   
+following commands:  
+```
+$ ./install.sh
+```
+  
+### Install Apex (for 16-bit training) 
+  
+For faster training install NVIDIA's apex library:
+  
+```
+$ git clone https://github.com/NVIDIA/apex
+$ cd apex
 
-</div>
+# ------------------------
+# OPTIONAL: on your cluster you might need to load CUDA 10 or 9
+# depending on how you installed PyTorch
+
+# see available modules
+module avail
+
+# load correct CUDA before install
+module load cuda-10.0
+# ------------------------
+
+# make sure you've loaded a cuda version > 4.0 and < 7.0
+module load gcc-6.1.0
+
+$ pip install -v --no-cache-dir --global-option="--cpp_ext" --global-option="--cuda_ext" ./
+```  
+
+* * *
+
+## KsponSpeech Directory Structure
+    
+- `dataset.dataset_path`: $BASE_PATH/KsponSpeech
+```
+$BASE_PATH/KsponSpeech
+├── KsponSpeech_01
+├── KsponSpeech_02
+├── KsponSpeech_03
+├── KsponSpeech_04
+└── KsponSpeech_05  
+```  
   
----
-  
-<img src="https://raw.githubusercontent.com/openspeech-team/openspeech/55e50cb9b3cc3e7a6dfddcd33e6e698cca3dae3b/docs/img/logo.png" height=20> OpenSpeech provides reference implementations of various ASR modeling papers and three languages recipe to perform tasks on automatic speech recognition. We aim to make ASR technology easier to use for everyone.    
+- `dataset.test_dataset_path`: $BASE_PATH/KsponSpeech_eval   
+```
+$BASE_PATH/KsponSpeech_eval  
+├── eval_clean
+└── eval_other  
+```
    
+- `dataset.test_manifest_dir`: $BASE_PATH/KsponSpeech_scripts  
+```
+$BASE_PATH/KsponSpeech_scripts  
+├── eval_clean.trn
+└── eval_other.trn  
+```
 
-<img src="https://raw.githubusercontent.com/openspeech-team/openspeech/55e50cb9b3cc3e7a6dfddcd33e6e698cca3dae3b/docs/img/logo.png" height=20>  OpenSpeech is backed by the two powerful libraries — [PyTorch-Lightning](https://github.com/PyTorchLightning/pytorch-lightning) and [Hydra](https://github.com/facebookresearch/hydra). 
-Various features are available in the above two libraries, including Multi-GPU and TPU training, Mixed-precision, and hierarchical configuration management.
-  
-  
-<img src="https://raw.githubusercontent.com/openspeech-team/openspeech/55e50cb9b3cc3e7a6dfddcd33e6e698cca3dae3b/docs/img/logo.png" height=20>  We appreciate any kind of feedback or contribution. Feel free to proceed with small issues like bug fixes, documentation improvement. For major contributions and new features, please discuss with the collaborators in corresponding issues.  
-  
+* * *
+
+## How to train
+
+"./openspeech/datasets/ksponspeech/lit_data_module.py" 파일에서 각자 데이터셋 크기에 맞게 사이즈를 조절하여 아래 명령어를 실행하면 됩니다.
+
+dataset.manifest_file_path, tokenizer.vocab_path는 기존에 있는 파일 경로라면 불러오는 방식이고, 없다면 생성하여 이용합니다
+
+sample_train.sh 파일에도 실행 예시가 있습니다!
+
+- quartznet15x5  
+
+```python
+python ./openspeech_cli/hydra_train.py \
+    dataset=ksponspeech \
+    dataset.dataset_path=$BASE_PATH/KsponSpeech \
+    dataset.manifest_file_path=/opt/ml/project/transcripts.txt \
+    dataset.test_dataset_path=$BASE_PATH/KsponSpeech_eval \
+    dataset.test_manifest_dir=$BASE_PATH/KsponSpeech_scripts \
+    tokenizer=kspon_character \
+    model=quartznet15x5 \
+    audio=mfcc \
+    lr_scheduler=warmup_reduce_lr_on_plateau \
+    trainer=gpu \
+    criterion=ctc \
+    tokenizer.vocab_path=/opt/ml/project/aihub_character_vocabs.csv \
+    trainer.batch_size=8
+```
+
+- joint_ctc_conformer_lstm  
+
+```python
+python ./openspeech_cli/hydra_train.py \
+    dataset=ksponspeech \
+    dataset.dataset_path=$BASE_PATH/KsponSpeech \
+    dataset.manifest_file_path=/opt/ml/project/transcripts.txt \
+    dataset.test_dataset_path=$BASE_PATH/KsponSpeech_eval \
+    dataset.test_manifest_dir=$BASE_PATH/KsponSpeech_scripts \
+    tokenizer=kspon_character \
+    model=joint_ctc_conformer_lstm \
+    audio=fbank \
+    lr_scheduler=warmup_reduce_lr_on_plateau \
+    trainer=gpu-fp16 \
+    criterion=cross_entropy \
+    tokenizer.vocab_path=/opt/ml/project/aihub_character_vocabs.csv \
+    trainer.batch_size=8
+```
+
+- conformer  
+
+```python
+python ./openspeech_cli/hydra_train.py \
+    dataset=ksponspeech \
+    dataset.dataset_path=$BASE_PATH/KsponSpeech \
+    dataset.manifest_file_path=/opt/ml/project/transcripts.txt \
+    dataset.test_dataset_path=$BASE_PATH/KsponSpeech_eval \
+    dataset.test_manifest_dir=$BASE_PATH/KsponSpeech_scripts \
+    tokenizer=kspon_character \
+    model=conformer \
+    audio=fbank \
+    lr_scheduler=warmup_reduce_lr_on_plateau \
+    trainer=gpu-fp16 \
+    criterion=ctc \
+    tokenizer.vocab_path=/opt/ml/project/aihub_character_vocabs.csv \
+    trainer.batch_size=16
+```
+
+
+- deepspeech2  
+
+```python
+python ./openspeech_cli/hydra_train.py \
+    dataset=ksponspeech \
+    dataset.dataset_path=$BASE_PATH/KsponSpeech \
+    dataset.manifest_file_path=/opt/ml/project/transcripts.txt \
+    dataset.test_dataset_path=$BASE_PATH/KsponSpeech_eval \
+    dataset.test_manifest_dir=$BASE_PATH/KsponSpeech_scripts \
+    tokenizer=kspon_character \
+    model=deepspeech2 \
+    audio=melspectrogram \
+    lr_scheduler=warmup_reduce_lr_on_plateau \
+    trainer=gpu-fp16 \
+    criterion=ctc \
+    tokenizer.vocab_path=/opt/ml/project/aihub_character_vocabs.csv \
+    trainer.batch_size=128
+```
+
+
+- listen_attend_spell 
+
+```python
+python ./openspeech_cli/hydra_train.py \
+    dataset=ksponspeech \
+    dataset.dataset_path=$BASE_PATH/KsponSpeech \
+    dataset.manifest_file_path=/opt/ml/project/new_transcripts.txt \
+    dataset.test_dataset_path=$BASE_PATH/KsponSpeech_eval \
+    dataset.test_manifest_dir=$BASE_PATH/KsponSpeech_scripts \
+    tokenizer=kspon_character \
+    model=listen_attend_spell \
+    audio=melspectrogram \
+    lr_scheduler=warmup_reduce_lr_on_plateau \
+    trainer=gpu-fp16 \
+    criterion=cross_entropy \
+    tokenizer.vocab_path=/opt/ml/project/aihub_character_vocabs.csv
+```
+* * *
+
 ## What's New
   
 - Aug 2021 [Added Smart Batching](https://github.com/openspeech-team/openspeech/pull/83)
@@ -244,32 +404,6 @@ $ python ./openspeech_cli/hydra_eval.py \
     eval.manifest_file_path=$MANIFEST_FILE_PATH  
 ```
   
-#### KsponSpeech Directory Structure
-    
-- `dataset.dataset_path`: $BASE_PATH/KsponSpeech
-```
-$BASE_PATH/KsponSpeech
-├── KsponSpeech_01
-├── KsponSpeech_02
-├── KsponSpeech_03
-├── KsponSpeech_04
-└── KsponSpeech_05  
-```  
-  
-- `dataset.test_dataset_path`: $BASE_PATH/KsponSpeech_eval   
-```
-$BASE_PATH/KsponSpeech_eval  
-├── eval_clean
-└── eval_other  
-```
-   
-- `dataset.test_manifest_dir`: $BASE_PATH/KsponSpeech_scripts  
-```
-$BASE_PATH/KsponSpeech_scripts  
-├── eval_clean.trn
-└── eval_other.trn  
-```
-  
 ### Language model training example
   
 Language model training requires only data to be prepared in the following format:  
@@ -297,62 +431,7 @@ $ python ./openspeech_cli/hydra_lm_train.py \
     criterion=perplexity
 ```
   
-## Installation
-  
-This project recommends Python 3.7 or higher.  
-We recommend creating a new virtual environment for this project (using virtual env or conda).
-  
 
-### Prerequisites
-  
-* numpy: `pip install numpy` (Refer [here](https://github.com/numpy/numpy) for problem installing Numpy).
-* pytorch: Refer to [PyTorch website](http://pytorch.org/) to install the version w.r.t. your environment.   
-* librosa: `conda install -c conda-forge librosa` (Refer [here](https://github.com/librosa/librosa) for problem installing librosa)
-* torchaudio: `pip install torchaudio==0.6.0` (Refer [here](https://github.com/pytorch/pytorch) for problem installing torchaudio)
-* sentencepiece: `pip install sentencepiece` (Refer [here](https://github.com/google/sentencepiece) for problem installing sentencepiece)
-* pytorch-lightning: `pip install pytorch-lightning` (Refer [here](https://github.com/PyTorchLightning/pytorch-lightning) for problem installing pytorch-lightning)
-* hydra: `pip install hydra-core --upgrade` (Refer [here](https://github.com/facebookresearch/hydra) for problem installing hydra)
-* warp-rnnt: Refer to [warp-rnnt page](https://github.com/1ytic/warp-rnnt) to install the library.
-* ctcdecode: Refer to [ctcdecode page](https://github.com/parlance/ctcdecode) to install the library.
-  
-### Install from pypi
-  
-You can install OpenSpeech with pypi.
-```
-pip install openspeech-core
-```
-  
-### Install from source
-Currently we only support installation from source code using setuptools. Checkout the source code and run the   
-following commands:  
-```
-$ ./install.sh
-```
-  
-### Install Apex (for 16-bit training) 
-  
-For faster training install NVIDIA's apex library:
-  
-```
-$ git clone https://github.com/NVIDIA/apex
-$ cd apex
-
-# ------------------------
-# OPTIONAL: on your cluster you might need to load CUDA 10 or 9
-# depending on how you installed PyTorch
-
-# see available modules
-module avail
-
-# load correct CUDA before install
-module load cuda-10.0
-# ------------------------
-
-# make sure you've loaded a cuda version > 4.0 and < 7.0
-module load gcc-6.1.0
-
-$ pip install -v --no-cache-dir --global-option="--cpp_ext" --global-option="--cuda_ext" ./
-```  
 
 ## Troubleshoots and Contributing
 If you have any questions, bug reports, and feature requests, please [open an issue](https://github.com/openspeech-team/OpenSpeech/issues) on Github.   
