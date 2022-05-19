@@ -54,9 +54,10 @@ class LightningKsponSpeechDataModule(pl.LightningDataModule):
     Args:
         configs (DictConfig): configuration set.
     """
-    KSPONSPEECH_TRAIN_NUM = 620000
-    KSPONSPEECH_VALID_NUM = 2545
-    KSPONSPEECH_TEST_NUM = 6000
+    # 데이터셋에 맞게 사이즈 조절해주기!!!
+    KSPONSPEECH_TRAIN_NUM = 240000 # 620000
+    KSPONSPEECH_VALID_NUM = 5000 # 2545
+    KSPONSPEECH_TEST_NUM = 1000 # 6000
 
     def __init__(self, configs: DictConfig) -> None:
         super(LightningKsponSpeechDataModule, self).__init__()
@@ -143,7 +144,7 @@ class LightningKsponSpeechDataModule(pl.LightningDataModule):
             None
         """
         valid_end_idx = self.KSPONSPEECH_TRAIN_NUM + self.KSPONSPEECH_VALID_NUM
-
+        print("train 개수",self.KSPONSPEECH_TRAIN_NUM,"valid 끝나는 인덱스",valid_end_idx)
         audio_paths, transcripts = self._parse_manifest_file()
         audio_paths = {
             "train": audio_paths[:self.KSPONSPEECH_TRAIN_NUM],
@@ -167,8 +168,8 @@ class LightningKsponSpeechDataModule(pl.LightningDataModule):
                 dataset_path=dataset_path,
                 audio_paths=audio_paths[stage],
                 transcripts=transcripts[stage],
-                sos_id=tokenizer.sos_id,
-                eos_id=tokenizer.eos_id,
+                sos_id=1, # tokenizer.sos_id,
+                eos_id=2, #tokenizer.eos_id,
                 apply_spec_augment=self.configs.audio.apply_spec_augment if stage == 'train' else False,
                 del_silence=self.configs.audio.del_silence if stage == 'train' else False,
             )

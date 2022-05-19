@@ -136,7 +136,8 @@ class SpeechToTextDataset(Dataset):
                 self.augments.append(self.AUDIO_JOINING)
 
         self.total_size = len(self.audio_paths)
-
+        # print(self.dataset_path)
+        # print(len(self.audio_paths),len(self.transcripts),len(self.augments))
         tmp = list(zip(self.audio_paths, self.transcripts, self.augments))
         random.shuffle(tmp)
         self.audio_paths, self.transcripts, self.augments = zip(*tmp)
