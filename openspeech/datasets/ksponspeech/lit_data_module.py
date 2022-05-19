@@ -54,7 +54,7 @@ class LightningKsponSpeechDataModule(pl.LightningDataModule):
     Args:
         configs (DictConfig): configuration set.
     """
-    KSPONSPEECH_TRAIN_NUM = 620000
+    KSPONSPEECH_TRAIN_NUM = 240000
     KSPONSPEECH_VALID_NUM = 2545
     KSPONSPEECH_TEST_NUM = 6000
 
