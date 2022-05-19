@@ -110,7 +110,8 @@ class KsponSpeechVocabulary(Vocabulary):
         """
         unit2id = dict()
         id2unit = dict()
-
+        ## 상대 경로 맞춰주기
+        label_path = '../../../' + label_path
         try:
             with open(label_path, 'r', encoding=encoding) as f:
                 labels = csv.reader(f, delimiter=',')
