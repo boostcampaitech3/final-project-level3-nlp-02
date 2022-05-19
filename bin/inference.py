@@ -19,6 +19,8 @@ import numpy as np
 import torchaudio
 from torch import Tensor
 
+from postprocess import remove_repetition
+
 from kospeech.vocabs.ksponspeech import KsponSpeechVocabulary
 from kospeech.data.audio.core import load_audio
 from kospeech.models import (
@@ -28,7 +30,6 @@ from kospeech.models import (
     ListenAttendSpell,
     Conformer,
 )
-
 
 def parse_audio(audio_path: str, del_silence: bool = False, audio_extension: str = 'pcm') -> Tensor:
     signal = load_audio(audio_path, del_silence, extension=audio_extension)
@@ -75,4 +76,4 @@ elif isinstance(model, SpeechTransformer) or isinstance(model, Jasper) or isinst
     y_hats = model.recognize(feature.unsqueeze(0), input_length)
 
 sentence = vocab.label_to_string(y_hats.cpu().detach().numpy())
-print(sentence)
+print(remove_repetition(sentence))
