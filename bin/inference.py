@@ -73,7 +73,9 @@ elif isinstance(model, DeepSpeech2):
     feature = feature.unsqueeze(0).to(torch.device("cuda"))
     y_hats = model.recognize(feature, input_length)
 elif isinstance(model, SpeechTransformer) or isinstance(model, Jasper) or isinstance(model, Conformer):
-    y_hats = model.recognize(feature.unsqueeze(0), input_length)
+    model.device = opt.device
+    feature = feature.unsqueeze(0).to(torch.device("cuda"))
+    y_hats = model.recognize(feature, input_length)
 
 sentence = vocab.label_to_string(y_hats.cpu().detach().numpy())
 print(remove_repetition(sentence))

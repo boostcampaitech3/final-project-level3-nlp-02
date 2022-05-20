@@ -125,6 +125,9 @@ class SupervisedTrainer(object):
             resume(bool, optional): resume training with the latest checkpoint, (default False)
         """
         start_epoch = 0
+        ### pre-train model ###
+        # if pretrain_path:
+        #     model = torch.load(pretrain_path)
 
         if pretrain_path:
             model = torch.load(pretrain_path)
