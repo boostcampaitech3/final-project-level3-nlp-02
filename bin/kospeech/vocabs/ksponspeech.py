@@ -12,12 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from cProfile import label
 import csv
+
+from torch import is_inference
 from kospeech.vocabs import Vocabulary
 
 
 class KsponSpeechVocabulary(Vocabulary):
-    def __init__(self, vocab_path, output_unit: str = 'character', sp_model_path=None):
+    def __init__(self, vocab_path, output_unit: str = 'character', sp_model_path=None, main=False):
         super(KsponSpeechVocabulary, self).__init__()
 
         self.vocab_path = vocab_path
@@ -34,7 +37,8 @@ class KsponSpeechVocabulary(Vocabulary):
             self.unk_id = 3
             self.blank_id = 4 #len(self)
         else:
-            self.vocab_dict, self.id_dict = self.load_vocab(vocab_path, encoding='utf-8')
+            # self.vocab_dict, self.id_dict = self.load_vocab(vocab_path, encoding='utf-8')
+            self.vocab_dict, self.id_dict = self.load_vocab(vocab_path, encoding='utf-8', ismain=main)
             self.sos_id = int(self.vocab_dict['<sos>'])
             self.eos_id = int(self.vocab_dict['<eos>'])
             self.pad_id = int(self.vocab_dict['<pad>'])
@@ -96,7 +100,7 @@ class KsponSpeechVocabulary(Vocabulary):
             sentences.append(sentence)
         return sentences
 
-    def load_vocab(self, label_path, encoding='utf-8'):
+    def load_vocab(self, label_path, encoding='utf-8', ismain=False):
         """
         Provides char2id, id2char
 
@@ -110,8 +114,12 @@ class KsponSpeechVocabulary(Vocabulary):
         """
         unit2id = dict()
         id2unit = dict()
-        ## 상대 경로 맞춰주기
-        label_path = '../../../' + label_path
+
+        # train(main)할 때 키고, inference(main==False)할 때 끄기,,
+        if ismain == True:
+            # 상대 경로 맞춰주기
+            label_path = '../../../' + label_path
+        
         try:
             with open(label_path, 'r', encoding=encoding) as f:
                 labels = csv.reader(f, delimiter=',')

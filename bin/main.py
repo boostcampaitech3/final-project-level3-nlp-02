@@ -83,13 +83,15 @@ def train(config: DictConfig) -> nn.DataParallel:
         vocab = KsponSpeechVocabulary(
             vocab_path=f'../../../dataset/kspon/kspon_sentencepiece.vocab',
             output_unit=config.train.output_unit,
-            sp_model_path='../../../dataset/kspon/kspon_sentencepiece.model'
+            sp_model_path='../../../dataset/kspon/kspon_sentencepiece.model',
+            main=True
         )
 
     else:
         vocab = KsponSpeechVocabulary(
             vocab_path=f'./data/vocab/aihub_{config.train.output_unit}_vocabs.csv',
             output_unit=config.train.output_unit,
+            main=True
         )
             
     if not config.train.resume:
