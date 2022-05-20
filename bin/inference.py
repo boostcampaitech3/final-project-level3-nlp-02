@@ -31,7 +31,7 @@ from kospeech.models import (
     Conformer,
 )
 
-def parse_audio(audio_path: str, del_silence: bool = False, audio_extension: str = 'pcm') -> Tensor:
+def parse_audio(audio_path: str, del_silence: bool = False, audio_extension: str = 'pcm'):
     signal = load_audio(audio_path, del_silence, extension=audio_extension)
     feature = torchaudio.compliance.kaldi.fbank(
         waveform=Tensor(signal).unsqueeze(0),
@@ -55,8 +55,8 @@ opt = parser.parse_args()
 
 feature = parse_audio(opt.audio_path, del_silence=True)
 input_length = torch.LongTensor([len(feature)])
-vocab = KsponSpeechVocabulary('data/vocab/aihub_character_vocabs.csv')
-# vocab = KsponSpeechVocabulary('/opt/ml/input/kspon_dataset/script/aihub_labels.csv') # 학습한 csv 파일
+# vocab = KsponSpeechVocabulary('data/vocab/aihub_character_vocabs.csv')
+vocab = KsponSpeechVocabulary('/opt/ml/input/kospeech/vocab/aihub_labels.csv') # 학습한 csv 파일
 
 model = torch.load(opt.model_path, map_location=lambda storage, loc: storage).to(opt.device)
 if isinstance(model, nn.DataParallel):

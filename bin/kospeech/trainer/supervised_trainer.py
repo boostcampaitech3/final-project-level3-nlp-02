@@ -75,7 +75,7 @@ class SupervisedTrainer(object):
             architecture: str = 'las',                     # model to train - las, transformer
             vocab: Vocabulary = None,                      # vocabulary object
             joint_ctc_attention: bool = False,             # flag indication whether joint CTC-Attention or not
-    ) -> None:
+    ):
         self.num_workers = num_workers
         self.optimizer = optimizer
         self.criterion = criterion
@@ -111,7 +111,8 @@ class SupervisedTrainer(object):
         num_epochs: int,                            # number of epochs (iteration) for training
         teacher_forcing_ratio: float = 0.99,        # teacher forcing ratio
         resume: bool = False,                       # resume training with the latest checkpoint
-    ) -> nn.Module:
+        pretrain_path: str = '',
+    ):
         """
         Run training for a given model.
 
@@ -124,6 +125,9 @@ class SupervisedTrainer(object):
             resume(bool, optional): resume training with the latest checkpoint, (default False)
         """
         start_epoch = 0
+
+        if pretrain_path:
+            model = torch.load(pretrain_path)
 
         if resume:
             checkpoint = Checkpoint()
@@ -198,7 +202,7 @@ class SupervisedTrainer(object):
             train_begin_time: float,
             queue: queue.Queue,
             teacher_forcing_ratio: float,
-    ) -> Tuple[nn.Module, float, float]:
+    ):
         """
         Run training one epoch
 
@@ -316,7 +320,7 @@ class SupervisedTrainer(object):
 
         return model, epoch_loss_total / total_num, cer
 
-    def _validate(self, model: nn.Module, queue: queue.Queue) -> float:
+    def _validate(self, model: nn.Module, queue: queue.Queue):
         """
         Run training one epoch
 
@@ -369,7 +373,7 @@ class SupervisedTrainer(object):
             target_lengths: Tensor,
             teacher_forcing_ratio: float,
             architecture: str,
-    ) -> Tuple[Tensor, Tensor, Tensor, Tensor]:
+    ):
         ctc_loss = None
         cross_entropy_loss = None
 
@@ -442,7 +446,7 @@ class SupervisedTrainer(object):
 
         return outputs, loss, ctc_loss, cross_entropy_loss
 
-    def _save_result(self, target_list: list, predict_list: list) -> None:
+    def _save_result(self, target_list: list, predict_list: list):
         results = {
             'targets': target_list,
             'predictions': predict_list
@@ -453,7 +457,7 @@ class SupervisedTrainer(object):
         results = pd.DataFrame(results)
         results.to_csv(save_path, index=False, encoding='cp949')
 
-    def _save_epoch_result(self, train_result: list, valid_result: list) -> None:
+    def _save_epoch_result(self, train_result: list, valid_result: list):
         """ Save result of epoch """
         train_dict, train_loss, train_cer = train_result
         valid_dict, valid_loss, valid_cer = valid_result
@@ -470,7 +474,7 @@ class SupervisedTrainer(object):
         train_df.to_csv(SupervisedTrainer.TRAIN_RESULT_PATH, encoding="cp949", index=False)
         valid_df.to_csv(SupervisedTrainer.VALID_RESULT_PATH, encoding="cp949", index=False)
 
-    def _save_step_result(self, train_step_result: dict, loss: float, cer: float) -> None:
+    def _save_step_result(self, train_step_result: dict, loss: float, cer: float):
         """ Save result of --save_result_every step """
         train_step_result["loss"].append(loss)
         train_step_result["cer"].append(cer)

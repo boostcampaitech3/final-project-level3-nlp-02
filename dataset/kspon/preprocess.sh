@@ -6,7 +6,6 @@ VOCAB_DEST="../../vocab"
 OUTPUT_UNIT='character'                                          # you can set character / subword / grapheme
 PREPROCESS_MODE='phonetic'                                       # phonetic : 칠 십 퍼센트,  spelling : 70%
 VOCAB_SIZE=5000                                                  # if you use subword output unit, set vocab size
-# VOCAB_SIZE=10000                                                  # if you use subword output unit, set vocab size
 
 # echo "Pre-process KsponSpeech Dataset.."
 

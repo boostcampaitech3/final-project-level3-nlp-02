@@ -71,7 +71,7 @@ KSPONSPEECH_SP_MODEL_PATH = '../../../dataset/kspon/kspon_sentencepiece.model'
 LIBRISPEECH_VOCAB_PATH = '../../../dataset/kspon/tokenizer.vocab'
 LIBRISPEECH_TOKENIZER_PATH = '../../../dataset/kspon/tokenizer.model'
 
-def train(config: DictConfig) -> nn.DataParallel:
+def train(config: DictConfig):
     random.seed(config.train.seed)
     torch.manual_seed(config.train.seed)
     torch.cuda.manual_seed_all(config.train.seed)
@@ -135,6 +135,7 @@ def train(config: DictConfig) -> nn.DataParallel:
         num_epochs=config.train.num_epochs,
         teacher_forcing_ratio=config.model.teacher_forcing_ratio,
         resume=config.train.resume,
+        pretrain_path="/opt/ml/input/kospeech/outputs/pre-train/model_ds2.pt"
     )
     return model
 
@@ -165,7 +166,7 @@ cs.store(group="model", name="rnnt", node=RNNTransducerConfig, package="model")
 
 
 @hydra.main(config_path=os.path.join('..', "configs"), config_name="train")
-def main(config: DictConfig) -> None:
+def main(config: DictConfig):
     warnings.filterwarnings('ignore')
     logger.info(OmegaConf.to_yaml(config))
     last_model_checkpoint = train(config)
