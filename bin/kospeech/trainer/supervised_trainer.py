@@ -126,9 +126,6 @@ class SupervisedTrainer(object):
         """
         start_epoch = 0
         ### pre-train model ###
-        # if pretrain_path:
-        #     model = torch.load(pretrain_path)
-
         if pretrain_path:
             model = torch.load(pretrain_path)
 

@@ -67,6 +67,7 @@ class DeepSpeech2TrainConfig(TrainConfig):
     num_epochs: int = 70
     reduction: str = "mean"
     lr_scheduler: str = 'tri_stage_lr_scheduler'
+    pretrain_path: str = ''
 
 
 @dataclass

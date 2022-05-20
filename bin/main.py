@@ -135,7 +135,8 @@ def train(config: DictConfig):
         num_epochs=config.train.num_epochs,
         teacher_forcing_ratio=config.model.teacher_forcing_ratio,
         resume=config.train.resume,
-        pretrain_path="/opt/ml/input/kospeech/outputs/pre-train/model_ds2.pt"
+        pretrain_path=config.data.pretrain_path
+        # pretrain_path="/opt/ml/input/kospeech/outputs/pre-train/model_ds2.pt"
     )
     return model
 

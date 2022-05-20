@@ -24,3 +24,4 @@ class DeepSpeech2Config(ModelConfig):
     hidden_dim: int = 1024
     activation: str = "hardtanh"
     num_encoder_layers: int = 3
+    pretrain_path: str = ''
