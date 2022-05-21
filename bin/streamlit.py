@@ -72,7 +72,7 @@ def main():
 
     st.header("음성 파일을 올려주세요.")
     with st.spinner("Uploading..."):
-        uploaded_file = st.file_uploader("Upload a file", type=["pcm", "wav","flac", "m4a"])
+        uploaded_file = st.file_uploader("Upload a file", type=["pcm", "wav", "flac", "m4a"])
         # st.success("Done!")
     if uploaded_file:
         if os.path.splitext(uploaded_file.name)[1] == '.m4a':
