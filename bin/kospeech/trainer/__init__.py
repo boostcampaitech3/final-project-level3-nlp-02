@@ -23,6 +23,7 @@ class TrainConfig:
     dataset_path: str = "???"
     transcripts_path: str = "../../../data/transcripts.txt"
     output_unit: str = "character"
+    pretrain_path: str = ""
 
     batch_size: int = 32
     save_result_every: int = 1000

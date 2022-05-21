@@ -3,7 +3,7 @@ dataset: 'kspon'
 dataset_path: '../../../../kspon_dataset/train'
 transcripts_path: '../../../dataset/kspon/transcripts.txt'
 output_unit: 'character'
-pretrain_path: '../../outputs/pre-train/model_ds2.pt'
+pretrain_path: ''
 
 # trainer
 num_epochs: 70
