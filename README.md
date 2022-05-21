@@ -37,6 +37,17 @@ kospeech 폴더 안으로 들어가, `sh train.sh`명령어로 train.sh를 만�
 
 현재 Deep Speech 2(pretrained, not pretrained), Conformer(not pretrained)를 사용할 수 있습니다.
 
+train을 시키기 위해, 먼저 transcripts.txt를 만들어야 합니다.
+
+transcripts.txt를 만들기 위해, preprocess.sh를 실행시켜줍시다. 
+
+/opt/ml/input/kospeech/dataset/kspon/로 이동합니다.
+
+sh preprocess.sh를 터미널에 입력하고, kspon 폴더에 transcripts.txt가 만들어진 것을 확인합니다.
+
+(주의) character가 아닌 subword로 preprocess를 할 경우, trainscript는 input/kospeech/vocab 폴더에 만들어집니다.
+
+
 pretrain된 Deep Speech 2를 실행하는 train.sh 명령문은 아래와 같습니다.
 ```shell
 python ./bin/main.py model=ds2 train=ds2_train \
@@ -45,7 +56,7 @@ train.num_epochs=3 \
 train.batch_size=128 \
 train.checkpoint_every=1000 \
 train.pretrain_path='/opt/ml/input/kospeech/outputs/pre-train/model_ds2.pt' \
-train.transcripts_path='/opt/ml/input/kospeech/vocab/transcripts.txt' # subword
+train.transcripts_path='/opt/ml/input/kospeech/dataset/kspon/transcripts.txt' # chararter
 ```
 
 pretrain되지 않은 Deep Speech 2를 실행하는 train.sh 명령문은 아래와 같습니다.
@@ -56,7 +67,7 @@ train.num_epochs=3 \
 train.batch_size=128 \
 train.checkpoint_every=1000 \
 train.pretrain_path='' \
-train.transcripts_path='/opt/ml/input/kospeech/vocab/transcripts.txt' # subword
+train.transcripts_path='/opt/ml/input/kospeech/dataset/kspon/transcripts.txt' # chararter
 ```
 
 Conformer의 경우, Conformer-large를 사용하면 batch_size=16에서 CUDA Out of Memory Error가 발생하여, Conformer-medium을 사용하고 있습니다.
@@ -70,8 +81,7 @@ train.checkpoint_every=1000 \
 train.num_epochs=3 \
 train.dataset_path='/opt/ml/input/kspon_dataset/train' \
 train.pretrain_path='' \
-train.transcripts_path='/opt/ml/input/kospeech/dataset/kspon/transcripts.txt' 
-pretrain_path, chararter
+train.transcripts_path='/opt/ml/input/kospeech/dataset/kspon/transcripts.txt' # chararter
 ```
    
 ### What's New
