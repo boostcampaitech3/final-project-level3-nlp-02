@@ -24,6 +24,55 @@
 </div>
      
 #### This repository archived. Further development is under way [here](https://github.com/sooftware/openspeech).
+
+## How to Train by AttractiveMinki
+
+요구되는 파일 구조는 다음과 같습니다.
+
+opt/ml/input/kospeech
+
+opt/ml/input 폴더를 만든 뒤, git을 clone받고 폴더 이름을 kospeech로 바꿔주세요
+
+kospeech 폴더 안으로 들어가, `sh train.sh`명령어로 train.sh를 만들어 실행하면 train할 수 있습니다.
+
+현재 Deep Speech 2(pretrained, not pretrained), Conformer(not pretrained)를 사용할 수 있습니다.
+
+pretrain된 Deep Speech 2를 실행하는 train.sh 명령문은 아래와 같습니다.
+```shell
+python ./bin/main.py model=ds2 train=ds2_train \
+train.dataset_path=/opt/ml/input/kspon_dataset/train \
+train.num_epochs=3 \
+train.batch_size=128 \
+train.checkpoint_every=1000 \
+train.pretrain_path='/opt/ml/input/kospeech/outputs/pre-train/model_ds2.pt' \
+train.transcripts_path='/opt/ml/input/kospeech/vocab/transcripts.txt' # subword
+```
+
+pretrain되지 않은 Deep Speech 2를 실행하는 train.sh 명령문은 아래와 같습니다.
+```shell
+python ./bin/main.py model=ds2 train=ds2_train \
+train.dataset_path=/opt/ml/input/kspon_dataset/train \
+train.num_epochs=3 \
+train.batch_size=128 \
+train.checkpoint_every=1000 \
+train.pretrain_path='' \
+train.transcripts_path='/opt/ml/input/kospeech/vocab/transcripts.txt' # subword
+```
+
+Conformer의 경우, Conformer-large를 사용하면 batch_size=16에서 CUDA Out of Memory Error가 발생하여, Conformer-medium을 사용하고 있습니다.
+
+Conformer를 실행하는 train.sh 명령문은 아래와 같습니다.
+```shell
+python ./bin/main.py model=conformer-medium \
+train=conformer_medium_train \
+train.batch_size=16 \
+train.checkpoint_every=1000 \
+train.num_epochs=3 \
+train.dataset_path='/opt/ml/input/kspon_dataset/train' \
+train.pretrain_path='' \
+train.transcripts_path='/opt/ml/input/kospeech/dataset/kspon/transcripts.txt' 
+pretrain_path, chararter
+```
    
 ### What's New
 - May 2021: Fix LayerNorm Error, Subword Error
@@ -272,56 +321,6 @@ We follow [PEP-8](https://www.python.org/dev/peps/pep-0008/) for code style. Esp
    
 ### License
 This project is licensed under the Apache-2.0 LICENSE - see the [LICENSE.md](https://github.com/sooftware/kospeech/blob/master/LICENSE) file for details
-
-## Hot to Train by Attractive Minki
-
-요구되는 파일 구조는 다음과 같습니다.
-
-opt/ml/input/kospeech
-
-opt/ml/input 폴더를 만든 뒤, git을 clone받고 폴더 이름을 kospeech로 바꿔주세요
-
-kospeech 폴더 안으로 들어가, `sh train.sh`명령어로 train.sh를 만들어 실행하면 train할 수 있습니다.
-
-현재 Deep Speech 2(pretrained, not pretrained), Conformer(not pretrained)를 사용할 수 있습니다.
-
-pretrain된 Deep Speech 2를 실행하는 train.sh 명령문은 아래와 같습니다.
-```shell
-python ./bin/main.py model=ds2 train=ds2_train \
-train.dataset_path=/opt/ml/input/kspon_dataset/train \
-train.num_epochs=3 \
-train.batch_size=128 \
-train.checkpoint_every=1000 \
-train.pretrain_path='/opt/ml/input/kospeech/outputs/pre-train/model_ds2.pt' \
-train.transcripts_path='/opt/ml/input/kospeech/vocab/transcripts.txt' # subword
-```
-
-pretrain되지 않은 Deep Speech 2를 실행하는 train.sh 명령문은 아래와 같습니다.
-```shell
-python ./bin/main.py model=ds2 train=ds2_train \
-train.dataset_path=/opt/ml/input/kspon_dataset/train \
-train.num_epochs=3 \
-train.batch_size=128 \
-train.checkpoint_every=1000 \
-train.pretrain_path='' \
-train.transcripts_path='/opt/ml/input/kospeech/vocab/transcripts.txt' # subword
-```
-
-Conformer의 경우, Conformer-large를 사용하면 batch_size=16에서 CUDA Out of Memory Error가 발생하여, Conformer-medium을 사용하고 있습니다.
-
-Conformer를 실행하는 train.sh 명령문은 아래와 같습니다.
-```shell
-python ./bin/main.py model=conformer-medium \
-train=conformer_medium_train \
-train.batch_size=16 \
-train.checkpoint_every=1000 \
-train.num_epochs=3 \
-train.dataset_path='/opt/ml/input/kspon_dataset/train' \
-train.pretrain_path='' \
-train.transcripts_path='/opt/ml/input/kospeech/dataset/kspon/transcripts.txt' 
-pretrain_path, chararter
-```
-
 
 ## Citation
   
