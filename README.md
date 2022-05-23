@@ -48,7 +48,31 @@ sh preprocess.sh를 터미널에 입력하고, kspon 폴더에 transcripts.txt�
 (주의) character가 아닌 subword로 preprocess를 할 경우, trainscript는 input/kospeech/vocab 폴더에 만들어집니다.
 
 
-pretrain된 Deep Speech 2를 실행하는 train.sh 명령문은 아래와 같습니다.
+문장을 나눌 때 character, subword 두 가지 방식이 있습니다.
+
+### character
+
+character로 preprocess, train, inference하는 법을 알아보겠습니다.
+
+먼저, preprocess를 하는 preprocess.sh를 보겠습니다.
+
+preprocess.sh의 위치는 input/kospeech/dataset/kspon/preprocess.sh로 하시면 됩니다.
+
+```shell
+### character ###
+python main.py \
+--dataset_path $DATASET_PATH \
+--vocab_dest $VOCAB_DEST \
+--vocab_size $VOCAB_SIZE \
+--output_unit 'character' \
+--preprocess_mode "spelling"
+```
+
+전처리를 했다면, train.sh를 돌리면 됩니다.
+
+train.sh는 /input/kospeech/train.sh로 두시면 됩니다.
+
+pretrain된 모델을 가지고 Deep Speech 2를 실행하는 train.sh 명령문은 아래와 같습니다.
 ```shell
 python ./bin/main.py model=ds2 train=ds2_train \
 train.dataset_path=/opt/ml/input/kspon_dataset/train \
@@ -59,7 +83,7 @@ train.pretrain_path='/opt/ml/input/kospeech/outputs/pre-train/model_ds2.pt' \
 train.transcripts_path='/opt/ml/input/kospeech/dataset/kspon/transcripts.txt' # chararter
 ```
 
-pretrain되지 않은 Deep Speech 2를 실행하는 train.sh 명령문은 아래와 같습니다.
+pretrain 모델을 참조하지 않는 Deep Speech 2를 실행하는 train.sh 명령문은 아래와 같습니다.
 ```shell
 python ./bin/main.py model=ds2 train=ds2_train \
 train.dataset_path=/opt/ml/input/kspon_dataset/train \
@@ -86,7 +110,7 @@ train.transcripts_path='/opt/ml/input/kospeech/dataset/kspon/transcripts.txt' # 
 
 Train 이후, Inference를 진행할 수 있습니다.
 
-Inference를 할 때 쓰는 inference.sh는 다음과 같습니다. (input/kospeech 폴더에 넣으시면 됩니다.)
+Inference를 할 때 쓰는 inference.sh는 다음과 같습니다. (input/kospeech/inference.sh 에 넣으시면 됩니다.)
 ```shell
 # Deep Speech 2 - train 파일 -> model_path는 train한 폴더 이름에 맞게 변경해주세요
 # python ./bin/inference.py --model_path /opt/ml/input/kospeech/outputs/2022-05-18/14-45-13_ds2_epo3/model.pt \
@@ -100,7 +124,60 @@ Inference를 할 때 쓰는 inference.sh는 다음과 같습니다. (input/kospe
 python ./bin/inference.py --model_path /opt/ml/input/kospeech/outputs/pre-train/model_ds2.pt \
 --audio_path /opt/ml/input/kspon_dataset/train/KsponSpeech_01/KsponSpeech_0003/KsponSpeech_002016.pcm --device cuda
 ```
-   
+
+model_path 경로는 폴더에 맞게 변경해주시면 됩니다.
+
+
+지금까지 character로 preprocess, train, inference하는 법을 알아보았습니다.
+
+이제, subword로 preprocess, train, inference하는 방법에 대해 알아보겠습니다.
+
+### subword
+
+preprocess.sh의 위치는 input/kospeech/dataset/kspon/preprocess.sh 입니다.
+```shell
+### subword ###
+python main.py \
+--dataset_path $DATASET_PATH \
+--savepath '/opt/ml/input/kospeech/vocab' \
+--vocab_dest $VOCAB_DEST \
+--vocab_size $VOCAB_SIZE \
+--output_unit 'subword' \
+--preprocess_mode "spelling" \
+--vocab_size 10000
+```
+
+train.sh는 다음과 같습니다. 위치는 역시 /input/kospeech/train.sh 입니다.
+
+pretrained된 모델을 참조하며 돌리는 법을 알아봅시다.
+
+만약 pretrained된 모델을 참조하고 싶지 않을 경우,
+
+train.pretrain_path=''로 하거나,
+train.pretrain_path 줄을 제거하시면 됩니다.
+
+```shell
+# Deep Speech 2 -> pretrained + subword
+python ./bin/main.py model=ds2 train=ds2_train \
+train.dataset_path=/opt/ml/input/kspon_dataset/train \
+train.num_epochs=5 \
+train.batch_size=64 \
+train.checkpoint_every=10 \
+train.pretrain_path='/opt/ml/input/kospeech/outputs/pre-train/model_ds2.pt' \
+train.output_unit='subword' \
+train.transcripts_path='/opt/ml/input/kospeech/dataset/kspon/transcripts.txt' # chararter
+```
+
+마지막으로, Inference.sh의 위치는 input/kospeech/inference.sh 입니다.
+```shell
+# Deep Speech 2 pretrain - train 파일, subword
+# python ./bin/inference.py --model_path /opt/ml/input/kospeech/outputs/2022-05-23/10-15-35/model.pt \
+# --audio_path /opt/ml/input/kspon_dataset/train/KsponSpeech_01/KsponSpeech_0005/KsponSpeech_004003.pcm --device cuda
+```
+model_path 경로는 폴더에 맞게 변경해주시면 됩니다.
+
+
+
 ### What's New
 - May 2021: Fix LayerNorm Error, Subword Error
 - Febuary 2021: Update Documentation
