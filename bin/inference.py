@@ -17,6 +17,7 @@ import torch
 import torch.nn as nn
 import numpy as np
 import torchaudio
+import os
 from torch import Tensor
 
 from postprocess import remove_repetition
@@ -53,7 +54,9 @@ parser.add_argument('--audio_path', type=str, required=True)
 parser.add_argument('--device', type=str, required=False, default='cpu')
 opt = parser.parse_args()
 
-feature = parse_audio(opt.audio_path, del_silence=True)
+extension = os.path.splitext(opt.audio_path)[1][1:]
+
+feature = parse_audio(opt.audio_path, del_silence=True, audio_extension=extension)
 input_length = torch.LongTensor([len(feature)])
 # vocab = KsponSpeechVocabulary('data/vocab/aihub_character_vocabs.csv')
 vocab = KsponSpeechVocabulary('/opt/ml/input/kospeech/vocab/aihub_labels.csv') # 학습한 csv 파일
