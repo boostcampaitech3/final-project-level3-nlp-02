@@ -9,22 +9,22 @@ VOCAB_SIZE=5000                                                  # if you use su
 
 # echo "Pre-process KsponSpeech Dataset.."
 
-#### subword ###
+# character를 사용할 때는 위의 주석을, subword를 사용할 때는 아래 주석을 풀어주세요.
+
+### character ###
 # python main.py \
 # --dataset_path $DATASET_PATH \
 # --vocab_dest $VOCAB_DEST \
-# --output_unit $OUTPUT_UNIT \
-# --preprocess_mode $PREPROCESS_MODE \
 # --vocab_size $VOCAB_SIZE \
-# --output_unit 'subword' \
-# --preprocess_mode "spelling" \
-# --savepath "../../vocab"
+# --output_unit 'character' \
+# --preprocess_mode "spelling"
 
-### character ###
+### subword ###
 python main.py \
 --dataset_path $DATASET_PATH \
+--savepath '/opt/ml/input/kospeech/vocab' \
 --vocab_dest $VOCAB_DEST \
 --vocab_size $VOCAB_SIZE \
---output_unit 'character' \
---preprocess_mode "spelling"
-# --savepath "../../vocab"
+--output_unit 'subword' \
+--preprocess_mode "spelling" \
+--vocab_size 10000

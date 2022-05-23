@@ -29,7 +29,7 @@ def load_audio(audio_path: str, del_silence: bool = False, extension: str = 'pcm
     try:
         if extension == 'pcm':
             signal = np.memmap(audio_path, dtype='h', mode='r').astype('float32')
-
+            
             if del_silence:
                 non_silence_indices = split(signal, top_db=30)
                 signal = np.concatenate([signal[start:end] for start, end in non_silence_indices])
