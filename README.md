@@ -162,17 +162,17 @@ python ./bin/main.py model=ds2 train=ds2_train \
 train.dataset_path=/opt/ml/input/kspon_dataset/train \
 train.num_epochs=5 \
 train.batch_size=64 \
-train.checkpoint_every=10 \
+train.checkpoint_every=1000 \
 train.pretrain_path='/opt/ml/input/kospeech/outputs/pre-train/model_ds2.pt' \
 train.output_unit='subword' \
-train.transcripts_path='/opt/ml/input/kospeech/dataset/kspon/transcripts.txt' # chararter
+train.transcripts_path='/opt/ml/input/kospeech/vocab/transcripts.txt' # subword
 ```
 
 마지막으로, Inference.sh의 위치는 input/kospeech/inference.sh 입니다.
 ```shell
 # Deep Speech 2 pretrain - train 파일, subword
-# python ./bin/inference.py --model_path /opt/ml/input/kospeech/outputs/2022-05-23/10-15-35/model.pt \
-# --audio_path /opt/ml/input/kspon_dataset/train/KsponSpeech_01/KsponSpeech_0005/KsponSpeech_004003.pcm --device cuda
+python ./bin/inference.py --model_path /opt/ml/input/kospeech/outputs/2022-05-23/10-15-35/model.pt \
+--audio_path /opt/ml/input/kspon_dataset/train/KsponSpeech_01/KsponSpeech_0005/KsponSpeech_004003.pcm --device cuda
 ```
 model_path 경로는 폴더에 맞게 변경해주시면 됩니다.
 
