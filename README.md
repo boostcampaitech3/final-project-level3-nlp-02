@@ -83,6 +83,23 @@ train.dataset_path='/opt/ml/input/kspon_dataset/train' \
 train.pretrain_path='' \
 train.transcripts_path='/opt/ml/input/kospeech/dataset/kspon/transcripts.txt' # chararter
 ```
+
+Train 이후, Inference를 진행할 수 있습니다.
+
+Inference를 할 때 쓰는 inference.sh는 다음과 같습니다. (input/kospeech 폴더에 넣으시면 됩니다.)
+```shell
+# Deep Speech 2 - train 파일 -> model_path는 train한 폴더 이름에 맞게 변경해주세요
+# python ./bin/inference.py --model_path /opt/ml/input/kospeech/outputs/2022-05-18/14-45-13_ds2_epo3/model.pt \
+# --audio_path /opt/ml/input/kspon_dataset/train/KsponSpeech_01/KsponSpeech_0003/KsponSpeech_002016.pcm --device cuda
+
+# Deep Speech 2 - eval 파일 -> 현재 지원하지 않음.
+# python ./bin/inference.py --model_path /opt/ml/input/kospeech/outputs/2022-05-18/14-45-13_ds2_epo3/model.pt \
+# --audio_path /opt/ml/input/kspon_dataset/eval/eval_clean/KsponSpeech_E00002.pcm --device cuda
+
+# Deep Speech 2 pretrain - train 파일 -> pretrain된 모델을 경로에 맞게 넣어주세요.
+python ./bin/inference.py --model_path /opt/ml/input/kospeech/outputs/pre-train/model_ds2.pt \
+--audio_path /opt/ml/input/kspon_dataset/train/KsponSpeech_01/KsponSpeech_0003/KsponSpeech_002016.pcm --device cuda
+```
    
 ### What's New
 - May 2021: Fix LayerNorm Error, Subword Error
