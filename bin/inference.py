@@ -51,6 +51,8 @@ def parse_audio(audio_path: str, del_silence: bool = False, audio_extension: str
 parser = argparse.ArgumentParser(description='KoSpeech')
 parser.add_argument('--model_path', type=str, required=True)
 parser.add_argument('--audio_path', type=str, required=True)
+parser.add_argument('--output_unit', type=str, required=False, default='character')
+parser.add_argument('--sp_model_path', type=str, required=False, default=None)
 parser.add_argument('--device', type=str, required=False, default='cpu')
 opt = parser.parse_args()
 
@@ -58,8 +60,17 @@ extension = os.path.splitext(opt.audio_path)[1][1:]
 
 feature = parse_audio(opt.audio_path, del_silence=True, audio_extension=extension)
 input_length = torch.LongTensor([len(feature)])
-# vocab = KsponSpeechVocabulary('data/vocab/aihub_character_vocabs.csv')
-vocab = KsponSpeechVocabulary('/opt/ml/input/kospeech/vocab/aihub_labels.csv') # 학습한 csv 파일
+
+print(f"{parser.output_unit}으로 진행합니다.")
+
+if parser.output_unit == 'subword':
+    vocab = KsponSpeechVocabulary(vocab_path="", output_unit='subword', sp_model_path=parser.sp_model_path)
+else:
+    try:
+        vocab = KsponSpeechVocabulary('/opt/ml/input/kospeech/vocab/aihub_labels.csv') # 학습한 csv 파일
+    except:
+        print("학습된 csv 파일이 없어 기본 csv파일로 진행합니다.")
+        vocab = KsponSpeechVocabulary('data/vocab/aihub_character_vocabs.csv')
 
 model = torch.load(opt.model_path, map_location=lambda storage, loc: storage).to(opt.device)
 if isinstance(model, nn.DataParallel):
