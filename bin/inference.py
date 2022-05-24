@@ -66,11 +66,11 @@ print(f"{parser.output_unit}으로 진행합니다.")
 if parser.output_unit == 'subword':
     vocab = KsponSpeechVocabulary(vocab_path="", output_unit='subword', sp_model_path=parser.sp_model_path)
 else:
-    try:
-        vocab = KsponSpeechVocabulary('/opt/ml/input/kospeech/vocab/aihub_labels.csv') # 학습한 csv 파일
-    except:
-        print("학습된 csv 파일이 없어 기본 csv파일로 진행합니다.")
-        vocab = KsponSpeechVocabulary('data/vocab/aihub_character_vocabs.csv')
+    # try:
+    #     vocab = KsponSpeechVocabulary('/opt/ml/input/kospeech/vocab/aihub_labels.csv') # 학습한 csv 파일
+    # except:
+    #     print("학습된 csv 파일이 없어 기본 csv파일로 진행합니다.")
+    vocab = KsponSpeechVocabulary('data/vocab/aihub_character_vocabs.csv')
 
 model = torch.load(opt.model_path, map_location=lambda storage, loc: storage).to(opt.device)
 if isinstance(model, nn.DataParallel):
