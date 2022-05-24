@@ -72,7 +72,6 @@ else:
     #     print("학습된 csv 파일이 없어 기본 csv파일로 진행합니다.")
     vocab = KsponSpeechVocabulary('data/vocab/aihub_character_vocabs.csv')
 
-
 model = torch.load(opt.model_path, map_location=lambda storage, loc: storage).to(opt.device)
 if isinstance(model, nn.DataParallel):
     model = model.module
