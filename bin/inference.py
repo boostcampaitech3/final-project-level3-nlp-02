@@ -58,8 +58,8 @@ extension = os.path.splitext(opt.audio_path)[1][1:]
 
 feature = parse_audio(opt.audio_path, del_silence=True, audio_extension=extension)
 input_length = torch.LongTensor([len(feature)])
-# vocab = KsponSpeechVocabulary('data/vocab/aihub_character_vocabs.csv')
-vocab = KsponSpeechVocabulary('/opt/ml/input/kospeech/vocab/aihub_labels.csv') # 학습한 csv 파일
+vocab = KsponSpeechVocabulary('data/vocab/aihub_character_vocabs.csv')
+# vocab = KsponSpeechVocabulary('/opt/ml/input/kospeech/vocab/aihub_labels.csv') # 학습한 csv 파일
 
 model = torch.load(opt.model_path, map_location=lambda storage, loc: storage).to(opt.device)
 if isinstance(model, nn.DataParallel):
