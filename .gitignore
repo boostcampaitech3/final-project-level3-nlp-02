@@ -1,0 +1,7 @@
+mdl
+*.sh
+.cache
+output
+download
+__pycache__
+audio
