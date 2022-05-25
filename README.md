@@ -12,9 +12,15 @@ The pre-trained models are tuned to achieve competitive performance for each dat
 To run the end-to-end ASR examples, you must install [PyTorch](https://pytorch.org/) and [ESPnet](https://github.com/espnet/espnet).
 We recommend you to use virtual environment created by [conda](https://docs.conda.io/en/latest/miniconda.html).
 
-```conda create -n ESPnet python=3```
+```conda create -n ESPnet python=3.10.4```
 
 ```conda activate ESPnet```
+
+```
+conda install cudatoolkit
+conda install cudnn
+```
+
 
 ---
 
