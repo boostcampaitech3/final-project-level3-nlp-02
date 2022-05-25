@@ -41,7 +41,8 @@ tokenizer.decode(summary_ids.squeeze().tolist(), skip_special_tokens=True)
 ```
 ## Requirements
 ```
-pytorch>=1.10.0
+pandas
+torch==1.10.0
 transformers==4.16.2
 pytorch-lightning==1.5.10
 streamlit==1.2.0
@@ -66,7 +67,8 @@ streamlit==1.2.0
 ## How to Train
 - KoBART summarization fine-tuning
 ```bash
-pip install -r requirements.txt
+pip install -r requirements.txt  
+pip install git+https://github.com/SKT-AI/KoBART#egg=kobart  
 
 [use gpu]
 python train.py  --gradient_clip_val 1.0  \
