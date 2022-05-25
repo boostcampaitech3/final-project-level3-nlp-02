@@ -10,7 +10,6 @@ __pycache__/
 logs/
 kobart_summary
 data/*.tsv
-imgs/
 nohup.out
 .Python
 build/
