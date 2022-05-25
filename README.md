@@ -16,6 +16,12 @@ We recommend you to use virtual environment created by [conda](https://docs.cond
 
 ```conda activate ESPnet```
 
+```
+conda install cudatoolkit
+conda install cudnn
+```
+
+
 ---
 
 Install pytorch according to your **GPU** version (or **CPU**).
