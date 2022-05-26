@@ -179,9 +179,10 @@ class Speech2Text:
             speech = torch.tensor(speech)
 
         # data: (Nsamples,) -> (1, Nsamples)
-        speech = speech.unsqueeze(0).to(getattr(torch, self.dtype))
+        # speech = speech.unsqueeze(0).to(getattr(torch, self.dtype))
         # lenghts: (1,)
-        lengths = speech.new_full([1], dtype=torch.long, fill_value=speech.size(1))
+        batch_size = len(speech)
+        lengths = speech.new_full([batch_size], dtype=torch.long, fill_value=speech.size(1))
         batch = {"speech": speech, "speech_lengths": lengths}
 
         # a. To device
@@ -189,33 +190,35 @@ class Speech2Text:
 
         # b. Forward Encoder
         enc, _ = self.asr_model.encode(**batch)
-        assert len(enc) == 1, len(enc)
+        # assert len(enc) == 1, len(enc)
 
         # c. Passed the encoder result and the beam search
-        nbest_hyps = self.beam_search(
-            x=enc[0], maxlenratio=self.maxlenratio, minlenratio=self.minlenratio
-        )
-        nbest_hyps = nbest_hyps[: self.nbest]
-
         results = []
-        for hyp in nbest_hyps:
-            assert isinstance(hyp, Hypothesis), type(hyp)
 
-            # remove sos/eos and get results
-            token_int = hyp.yseq[1:-1].tolist()
+        for i in range(batch_size):
+            nbest_hyps = self.beam_search(
+                x=enc[i], maxlenratio=self.maxlenratio, minlenratio=self.minlenratio
+            )
+            nbest_hyps = nbest_hyps[:self.nbest]
+            
+            for hyp in nbest_hyps:
+                assert isinstance(hyp, Hypothesis), type(hyp)
 
-            # remove blank symbol id, which is assumed to be 0
-            token_int = list(filter(lambda x: x != 0, token_int))
+                # remove sos/eos and get results
+                token_int = hyp.yseq[1:-1].tolist()
 
-            # Change integer-ids to tokens
-            token = self.converter.ids2tokens(token_int)
+                # remove blank symbol id, which is assumed to be 0
+                token_int = list(filter(lambda x: x != 0, token_int))
 
-            if self.tokenizer is not None:
-                text = self.tokenizer.tokens2text(token)
-            else:
-                text = None
-            results.append((text, token, token_int, hyp))
+                # Change integer-ids to tokens
+                token = self.converter.ids2tokens(token_int)
 
+                if self.tokenizer is not None:
+                    text = self.tokenizer.tokens2text(token)
+                else:
+                    text = None
+                results.append((text, token, token_int, hyp))
+        
         assert check_return_type(results)
         return results
 
@@ -248,8 +251,8 @@ def inference(
     allow_variable_data_keys: bool,
 ):
     assert check_argument_types()
-    if batch_size > 1:
-        raise NotImplementedError("batch decoding is not implemented")
+    # if batch_size > 1:
+    #     raise NotImplementedError("batch decoding is not implemented")
     if word_lm_train_config is not None:
         raise NotImplementedError("Word LM is not implemented")
     if ngpu > 1:
@@ -308,8 +311,7 @@ def inference(
             assert all(isinstance(s, str) for s in keys), keys
             _bs = len(next(iter(batch.values())))
             assert len(keys) == _bs, f"{len(keys)} != {_bs}"
-            batch = {k: v[0] for k, v in batch.items() if not k.endswith("_lengths")}
-
+            batch = {k: v for k, v in batch.items() if not k.endswith("_lengths")}
             # N-best list of (text, token, token_int, hyp_object)
             results = speech2text(**batch)
 
