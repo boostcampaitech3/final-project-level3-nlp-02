@@ -61,8 +61,8 @@ class SplitOnSilenceDataset(Dataset):
 
     def __getitem__(self, index):
         file_name = self.audio_files[index]
-        audio, rate = wavfile.read(file_name)
-        assert rate == self.sampling_rate
+        rate, audio = wavfile.read(file_name)
+        assert rate == self.sampling_rate, rate
         data = torch.tensor(audio/32767, dtype=self.dtype)
         return data
 
