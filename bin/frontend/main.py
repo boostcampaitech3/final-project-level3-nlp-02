@@ -76,7 +76,6 @@ def main():
         )
     st.write("STT 작업이 완료되었습니다.")
     st.write(response)
-    st.write(response.json())
 
 
 
@@ -85,9 +84,6 @@ def main():
     
 
 
-    # get_response = requests.post(
-    #     url=f"{backend_address}/write",
-    #     data=data,
     #     headers={"Content-Type": "application/json"}
     # )
 
