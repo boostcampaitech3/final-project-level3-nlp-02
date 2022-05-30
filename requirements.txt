@@ -36,7 +36,7 @@ g2p-en==2.1.0
 gitdb==4.0.9
 GitPython==3.1.27
 h5py==3.7.0
-huggingface-hub==0.6.0
+huggingface-hub==0.7.0
 humanfriendly==10.0
 idna @ file:///tmp/build/80754af9/idna_1637925883363/work
 importlib-metadata==4.11.4
@@ -116,6 +116,7 @@ six @ file:///tmp/build/80754af9/six_1644875935023/work
 smmap==5.0.0
 SoundFile==0.10.3.post1
 soupsieve==2.3.2.post1
+sox==1.4.1
 stack-data==0.2.0
 streamlit==1.9.0
 terminado==0.15.0
