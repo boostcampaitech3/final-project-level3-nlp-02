@@ -20,13 +20,48 @@ def downsampling(audio_file, sampling_rate=16000):
     audio, rate = librosa.load(audio_file, sr=sampling_rate)
     return audio, rate
 
+
+def save_uploaded_file(directory, file):
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    with open(os.path.join(directory, file.name), 'wb') as f:
+        f.write(file.getbuffer())
+    return os.path.join(directory, file.name)
+
+
 def main():
-    st.write('반갑습니다.')
-    response = requests.get(f"{backend_address}/")
-    st.write(response)
-    label = response.json()
-    st.write(label)
-    st.write('반갑습니다.~')
+    st.header("음성 파일을 올려주세요.")
+    with st.spinner("wait"):
+        uploaded_file = st.file_uploader("Upload a file", type=["pcm", "wav", "flac", "m4a"])
+
+    if uploaded_file:
+        audio_file = save_uploaded_file("audio", uploaded_file)
+
+        audio, rate = downsampling(audio_file)
+
+        start_time = time.time()
+        print("JOB START!!!")
+
+        with open(CONFIG_FILE) as f:
+            config = yaml.load(f, Loader=yaml.FullLoader)
+
+        with st.spinner("STT 작업을 진행하고 있습니다"):
+            speech2text = Speech2Text(
+                asr_train_config=ASR_TRAIN_CONFIG, 
+                asr_model_file=ASR_MODEL_FILE, 
+                device='cuda',
+                dtype='float32',
+                **config
+                )
+
+            result = speech2text(audio)
+
+            st.write(result[0][0])
+            # st.write(result[0][1])
+
+        print(f"Total time: {time.time() - start_time}")
+        print("JOB DONE!!!")
 
     url = st.text_input("텍스트를 입력해주세요", type="default")
     # 텍스트 입력안내 문구
@@ -71,15 +106,7 @@ def main():
             # 파일 있으면 while 탈출
             if os.path.exists(f'{DOWNLOAD_FOLDER_PATH}{specific_url}/{specific_url}.wav'):
                 break
-    
-    ### 필요없을거같아서 주석처리
-    # # 생성한 파일 가져오기
-    # response = requests.post(
-    #     url=f"{backend_address}/get_voice",
-    #     json=data
-    # )
-    # st.write(response.json())
-    # print(response.json())
+
     # 음성 파일 STT 돌리기
     st.write("음성 추출이 완료되었습니다.")
     st.write("STT 작업이 진행중입니다.")
@@ -122,13 +149,9 @@ def main():
         print("JOB DONE!!!")
         print('!!!!', result, type(result))
 
-
-    
     st.write("STT 작업이 완료되었습니다.")
     st.write(result)
   
-
-
 
 if __name__ == "__main__":
     main()
