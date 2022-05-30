@@ -20,11 +20,6 @@ app = FastAPI()
 # CONFIG_FILE = "/opt/ml/input/espnet-asr/conf/decode_asr.yaml"
 DOWNLOAD_FOLDER_PATH = "../../download/"
 
-@app.get("/")
-def hello_world():
-    print('get, hello')
-    return {"hello": "world"}
-
 # "유튜브 링크" dict 데이터 유효성 체크해주는 pydantic
 class Url_check(BaseModel):
     url: str
