@@ -7,6 +7,7 @@ import librosa
 
 from utils.utils import Speech2Text
 from scipy.io import wavfile
+from streamlit_player import st_player
 
 
 backend_address = "http://localhost:8001"
@@ -84,6 +85,9 @@ def main():
         return
     specific_url = response.json()['url']
 
+    # 유튜브 영상 삽입
+    st_player(f"https://youtu.be/{specific_url}")
+
     data = {
         'url': specific_url,
     }
@@ -150,7 +154,7 @@ def main():
         print('!!!!', result, type(result))
 
     st.write("STT 작업이 완료되었습니다.")
-    st.write(result)
+    st.write(result[0][0])
   
 
 if __name__ == "__main__":
