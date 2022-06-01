@@ -7,6 +7,7 @@ from datetime import datetime
 import torch
 import numpy as np
 from torch.utils.data.dataset import Dataset
+import librosa
 
 import librosa
 from scipy.io import wavfile
@@ -14,6 +15,10 @@ from pydub import AudioSegment
 from utils import audio2wav, split_on_silence
 # from pydub.silence import split_on_silence, detect_nonsilent
 
+
+def downsampling(audio_file, sampling_rate=16000):
+    audio, rate = librosa.load(audio_file, sr=sampling_rate)
+    return audio, rate
 
 class SplitOnSilenceDataset(Dataset):
     """
@@ -113,7 +118,6 @@ class SplitOnSilenceDataset(Dataset):
                     audio_chunk_start = 1
 
                 audio_chunks, timelines = split_on_silence(chunk, min_silence_len=self.min_silence_len, silence_thresh=self.silence_thresh, keep_silence=self.keep_silence)
-
                 audio_chunks = audio_chunks[audio_chunk_start:-1]
                 timelines = timelines[audio_chunk_start:-1]
                 
