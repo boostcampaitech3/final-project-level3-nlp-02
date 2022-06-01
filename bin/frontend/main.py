@@ -4,12 +4,21 @@ import time
 import os
 import yaml
 import librosa
+import sys
 
-from utils.utils import Speech2Text
 from scipy.io import wavfile
 from streamlit_player import st_player
+from torch.utils.data.dataloader import DataLoader
+import torch
+import numpy as np
+
+# 상위 디렉토리에서 dataset 가져오기
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+from dataset import SplitOnSilenceDataset
+from asr_inference import Speech2Text
 
 
+BATCH_SIZE = 32
 backend_address = "http://localhost:8001"
 ASR_TRAIN_CONFIG = "/opt/ml/input/espnet-asr/.cache/espnet/e589f98042183b3a316257e170034e5e/exp/asr_train_asr_transformer2_ddp_raw_bpe/config.yaml"
 ASR_MODEL_FILE = "/opt/ml/input/espnet-asr/.cache/espnet/e589f98042183b3a316257e170034e5e/exp/asr_train_asr_transformer2_ddp_raw_bpe/valid.acc.ave_10best.pth"
@@ -31,6 +40,25 @@ def save_uploaded_file(directory, file):
     return os.path.join(directory, file.name)
 
 
+def collate_fn(batch):
+    speech_dict = dict()
+    speech_tensor = torch.tensor([])
+
+    audio_max_len = 0
+    for data in batch:
+        audio_max_len = max(audio_max_len, len(data))
+
+    for data in batch:
+        zero_tensor = torch.zeros((1, audio_max_len - len(data)))
+        data = torch.unsqueeze(data, 0)
+        tensor_with_pad = torch.cat((data, zero_tensor), dim=1)
+        speech_tensor = torch.cat((speech_tensor, tensor_with_pad), dim=0)
+    
+    speech_dict['speech'] = speech_tensor
+
+    return speech_dict
+
+
 def main():
     st.header("음성 파일을 올려주세요.")
     with st.spinner("wait"):
@@ -40,6 +68,9 @@ def main():
         audio_file = save_uploaded_file("audio", uploaded_file)
 
         audio, rate = downsampling(audio_file)
+        st.write(audio)
+        st.write(rate)
+        st.write(max(audio))
 
         start_time = time.time()
         print("JOB START!!!")
@@ -114,47 +145,85 @@ def main():
     # 음성 파일 STT 돌리기
     st.write("음성 추출이 완료되었습니다.")
     st.write("STT 작업이 진행중입니다.")
-    with st.spinner("STT 작업을 진행하고 있습니다"):
+    # with st.spinner("STT 작업을 진행하고 있습니다"):
         # response = requests.post(
         #     url=f"{backend_address}/stt",
         #     json=data
         # )
         # response.raise_for_status() # ensure we notice bad responses
         # 파일 가져오기
-        with open(f'{DOWNLOAD_FOLDER_PATH}{specific_url}/{specific_url}.wav', 'r') as f:      
-            audio_file = f.name
+        # with open(f'{DOWNLOAD_FOLDER_PATH}{specific_url}/{specific_url}.wav', 'r') as f:      
+        #     audio_file = f.name
 
+        # audio, rate = downsampling(audio_file)
+        # st.write(specific_url)
         # downsampling
-        fs, audio = wavfile.read(f"{DOWNLOAD_FOLDER_PATH}{specific_url}/{specific_url}.wav")
-        if fs != 16000:
-            audio, rate = downsampling(audio_file)
+        # start_time = time.time()
 
-        print('####@@@@', audio.shape)
+        ### wavfile.read가 빠른데 단점이 있다.
+        ### downsampling(librosa.load)는 출력값이 한 열로 나오고, 최댓값이 0.548정도이다.
+        ### wavfile.read는 출력값이 두 열로 나오고, 최댓값이 36만 정도? 이다.
+        ### 두 열로 나올때와, 최댓값을 어떻게 normalize시켜줘야할지 헷갈린다.
+        ### normalize시키기 위한 연산을 할 때, 시간이 많이 들어 오히려 downsampling보다 많은 시간이 소요되는 것 같다.
+        ### 이상한 출력이 나오는 원인인 것 같다.
+        # fs, audio = wavfile.read(f"{DOWNLOAD_FOLDER_PATH}{specific_url}/{specific_url}.wav")
+        # maximum = max(max(au) for au in audio)
+        # for i in range(len(audio)):
+        #     for j in range(len(audio[i])):
+        #         audio[i][j] = audio[i][j] / (maximum * 2)
+        # st.write(f"calc time: {time.time() - start_time}")
+        # if fs != 16000:
+        #     audio, rate = downsampling(audio)
+        # st.write(f"downsampling time: {time.time() - start_time}")
+        
+    ## 우진님 파일 자르는거 도입, app.py 75번 째 줄부터
 
-        ## 우진님 파일 자르는거 도입해야댐
+    # config file 설정
+    with open(CONFIG_FILE) as f:
+        config = yaml.load(f, Loader=yaml.FullLoader)
 
-        start_time = time.time()
-        print("JOB START!!!")
+    speech2text = Speech2Text(
+        asr_train_config=ASR_TRAIN_CONFIG, 
+        asr_model_file=ASR_MODEL_FILE, 
+        device='cuda',
+        dtype='float32',
+        **config
+    )
+    
+    dataset = SplitOnSilenceDataset(f'{DOWNLOAD_FOLDER_PATH}{specific_url}/{specific_url}.wav')
+    loader = DataLoader(dataset, batch_size=BATCH_SIZE, collate_fn=collate_fn)
 
-        # config file 설정
-        with open(CONFIG_FILE) as f:
-            config = yaml.load(f, Loader=yaml.FullLoader)
+    start_time = time.time()
+    print("JOB START!!!")
+    talk_list = list()
+    with st.spinner("STT 작업을 진행하고 있습니다"):
+        for batch in loader:
+            mid_time = time.time()
+            batch = {k: v for k, v in batch.items() if not k.endswith("_lengths")}
+            results = speech2text(**batch)
+            temp_list = list()
+            for bat in results:
+                talk_list.append(bat[0])
+                temp_list.append(bat[0])
+            st.write(temp_list)
 
-        speech2text = Speech2Text(
-            asr_train_config=ASR_TRAIN_CONFIG, 
-            asr_model_file=ASR_MODEL_FILE, 
-            device='cuda',
-            dtype='float32',
-            **config
-        )
+            # for result in results:
+            #     with open(OUTPUT_TXT, "a") as f:
+            #         f.write(result[0]+"\n")
 
-        result = speech2text(audio)
-        print(f"Total time: {time.time() - start_time}")
+            # with open(OUTPUT_TXT, "a") as f:
+            #     f.write(f"Total time: {end_time - start_time}\n\n")
+
+            mid_end_time = time.time()
+            print(f"check time: {mid_end_time - mid_time}")
+
+        end_time = time.time()
+        print(f"Total time: {end_time - start_time}")
         print("JOB DONE!!!")
-        print('!!!!', result, type(result))
-
+        print('!!!!', results, type(results))
+    
+    st.write(talk_list)
     st.write("STT 작업이 완료되었습니다.")
-    st.write(result[0][0])
   
 
 if __name__ == "__main__":

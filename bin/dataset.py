@@ -7,11 +7,16 @@ from requests import delete
 import torch
 import numpy as np
 from torch.utils.data.dataset import Dataset
+import librosa
 
 from scipy.io import wavfile
 from pydub import AudioSegment
 from pydub.silence import split_on_silence
 
+
+def downsampling(audio_file, sampling_rate=16000):
+    audio, rate = librosa.load(audio_file, sr=sampling_rate)
+    return audio, rate
 
 class SplitOnSilenceDataset(Dataset):
     def __init__(self, audio_path, dtype=torch.float32, sampling_rate=16000, min_silence_len=500, silence_thresh=-40):
@@ -51,6 +56,7 @@ class SplitOnSilenceDataset(Dataset):
 
             for i, chunk in enumerate(audio_chunks):
                 output_file = os.path.join(self.chunk_path, f"chunk{i:05}.wav")
+                chunk = chunk.set_channels(1)
                 chunk.export(output_file, format="wav")
 
         else:
@@ -61,9 +67,14 @@ class SplitOnSilenceDataset(Dataset):
 
     def __getitem__(self, index):
         file_name = self.audio_files[index]
-        rate, audio = wavfile.read(file_name)
+        # rate, audio = wavfile.read(file_name)
+        audio, rate = downsampling(file_name)
         assert rate == self.sampling_rate, rate
-        data = torch.tensor(audio/32767, dtype=self.dtype)
+        # data = torch.tensor(audio/32767, dtype=self.dtype)
+        data = torch.tensor(audio, dtype=self.dtype)
+        # print('#####')
+        # for da in data:
+        #     print(da)
         return data
 
 

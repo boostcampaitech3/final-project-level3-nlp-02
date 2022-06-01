@@ -58,6 +58,13 @@ def set_voice(specific_url: Url_check):
     if not os.path.exists(f'{DOWNLOAD_FOLDER_PATH}{specific_url}/'):
         os.makedirs(f'{DOWNLOAD_FOLDER_PATH}{specific_url}')
 
+    # 만든 파일이 빈 파일이면 에러가 나는 경우 발생 -> 파일 크기가 0인지 체크
+    if os.path.exists(f'{DOWNLOAD_FOLDER_PATH}{specific_url}/{specific_url}.wav'):
+        file_size = os.path.getsize(f'{DOWNLOAD_FOLDER_PATH}{specific_url}/{specific_url}.wav')
+        if file_size < 1:
+            # 빈파일 삭제
+            os.remove(f'{DOWNLOAD_FOLDER_PATH}{specific_url}/{specific_url}.wav')
+
     # # 파일 없으면 가져오기
     if not os.path.exists(f'{DOWNLOAD_FOLDER_PATH}{specific_url}/{specific_url}.wav'):
         start_time = time.time()
