@@ -25,7 +25,7 @@ ASR_TRAIN_CONFIG = "/opt/ml/input/espnet-asr/.cache/espnet/e589f98042183b3a31625
 ASR_MODEL_FILE = "/opt/ml/input/espnet-asr/.cache/espnet/e589f98042183b3a316257e170034e5e/exp/asr_train_asr_transformer2_ddp_raw_bpe/valid.acc.ave_10best.pth"
 CONFIG_FILE = "/opt/ml/input/espnet-asr/conf/fast_decode_asr_ksponspeech.yaml"
 
-BATCH_SIZE = 32
+BATCH_SIZE = 8
 AUDIO_PATH = "/opt/ml/input/sample_dataset/AAYN.wav"
 OUTPUT_TXT = "/opt/ml/input/result.txt"
 
@@ -33,18 +33,21 @@ OUTPUT_TXT = "/opt/ml/input/result.txt"
 def collate_fn(batch):
     speech_dict = dict()
     speech_tensor = torch.tensor([])
+    timelines = []
 
     audio_max_len = 0
-    for data in batch:
+    for data, timeline in batch:
         audio_max_len = max(audio_max_len, len(data))
 
-    for data in batch:
+    for data, timeline in batch:
         zero_tensor = torch.zeros((1, audio_max_len - len(data)))
         data = torch.unsqueeze(data, 0)
         tensor_with_pad = torch.cat((data, zero_tensor), dim=1)
         speech_tensor = torch.cat((speech_tensor, tensor_with_pad), dim=0)
+        timelines.append(timeline)
     
     speech_dict['speech'] = speech_tensor
+    speech_dict['timeline'] = timelines
 
     return speech_dict
 
@@ -69,55 +72,29 @@ def main():
         asr_model_file=ASR_MODEL_FILE, 
         device='cuda',
         dtype='float32',
-        **config
+        **config, 
         )
 
-    dataset = SplitOnSilenceDataset(AUDIO_PATH)
+    dataset = SplitOnSilenceDataset(AUDIO_PATH, sampling_rate=16000, min_silence_len=500, silence_thresh=-40)
 
     loader = DataLoader(dataset, batch_size=BATCH_SIZE, collate_fn=collate_fn)
 
     for batch in loader:
+        timelines = batch.pop("timeline")
         batch = {k: v for k, v in batch.items() if not k.endswith("_lengths")}
         results = speech2text(**batch)
 
         end_time = time.time()
 
-        for result in results:
+        for result, timeline in zip(results, timelines):
             with open(OUTPUT_TXT, "a") as f:
-                f.write(result[0]+"\n")
+                f.write(f"{int(timeline)//60:02}:{int(timeline)%60:02}  {result[0]}\n")
 
         with open(OUTPUT_TXT, "a") as f:
             f.write(f"Total time: {end_time - start_time}\n\n")
 
         print(f"Total time: {time.time() - start_time}")
     print("JOB DONE!!!")
-
-
-    # audio_path = "/opt/ml/input/chunks"
-    # audio_file = "/opt/ml/input/espnet-asr/evalset/ksponspeech/wavs/KsponSpeech_E00001.wav"
-
-    # total_duration = 0
-
-    # for file_name in tqdm(sorted(os.listdir(audio_path))):
-    #     audio_file = os.path.join(audio_path, file_name)
-    #     audio, rate = downsampling(audio_file, sampling_rate=16000)
-    #     duration = len(audio)/rate
-
-    #     result = speech2text(audio)
-
-    #     with open(FILE_NAME, "a") as f:
-    #         f.write(f"{int(total_duration)//60:02}:{int(total_duration)%60:02}  {result[0][0]}\n")
-
-    #     total_duration += duration
-        
-    # end_time = time.time()
-
-    # with open(FILE_NAME, "a") as f:
-    #     f.write(f"Total time: {end_time - start_time}\n\n\n")
-
-    # print(f"Total time: {time.time() - start_time}")
-    # print("JOB DONE!!!")
-
 
 if __name__ == "__main__":
     main()

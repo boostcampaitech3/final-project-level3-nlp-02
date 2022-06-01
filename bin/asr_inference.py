@@ -3,6 +3,7 @@ import argparse
 import logging
 from pathlib import Path
 import sys
+import time
 import warnings
 from typing import Optional
 from typing import Sequence
@@ -110,20 +111,20 @@ class Speech2Text:
             pre_beam_score_key=None if ctc_weight == 1.0 else "full",
         )
         # TODO(karita): make all scorers batchfied
-        if batch_size == 1:
-            non_batch = [
-                k
-                for k, v in beam_search.full_scorers.items()
-                if not isinstance(v, BatchScorerInterface)
-            ]
-            if len(non_batch) == 0:
-                beam_search.__class__ = BatchBeamSearch
-                logging.info("BatchBeamSearch implementation is selected.")
-            else:
-                logging.warning(
-                    f"As non-batch scorers {non_batch} are found, "
-                    f"fall back to non-batch implementation."
-                )
+        # if batch_size == 1:
+        non_batch = [
+            k
+            for k, v in beam_search.full_scorers.items()
+            if not isinstance(v, BatchScorerInterface)
+        ]
+        if len(non_batch) == 0:
+            beam_search.__class__ = BatchBeamSearch
+            logging.info("BatchBeamSearch implementation is selected.")
+        else:
+            logging.warning(
+                f"As non-batch scorers {non_batch} are found, "
+                f"fall back to non-batch implementation."
+            )
         beam_search.to(device=device, dtype=getattr(torch, dtype)).eval()
         for scorer in scorers.values():
             if isinstance(scorer, torch.nn.Module):
@@ -178,6 +179,9 @@ class Speech2Text:
         if isinstance(speech, np.ndarray):
             speech = torch.tensor(speech)
 
+        if speech.ndim == 1:
+            speech = speech.unsqueeze(0)
+
         # data: (Nsamples,) -> (1, Nsamples)
         # speech = speech.unsqueeze(0).to(getattr(torch, self.dtype))
         # lenghts: (1,)
@@ -195,11 +199,12 @@ class Speech2Text:
         # c. Passed the encoder result and the beam search
         results = []
 
+        # start_time = time.time()
         for i in range(batch_size):
             nbest_hyps = self.beam_search(
                 x=enc[i], maxlenratio=self.maxlenratio, minlenratio=self.minlenratio
             )
-            nbest_hyps = nbest_hyps[:self.nbest]
+            # nbest_hyps = nbest_hyps[:self.nbest]
             
             for hyp in nbest_hyps:
                 assert isinstance(hyp, Hypothesis), type(hyp)
@@ -217,8 +222,13 @@ class Speech2Text:
                     text = self.tokenizer.tokens2text(token)
                 else:
                     text = None
-                results.append((text, token, token_int, hyp))
-        
+
+                if text.strip():
+                    break
+
+            results.append((text, token, token_int, hyp))
+
+        # print(time.time() - start_time)
         assert check_return_type(results)
         return results
 
@@ -282,6 +292,7 @@ def inference(
         device=device,
         maxlenratio=maxlenratio,
         minlenratio=minlenratio,
+        batch_size=batch_size,
         dtype=dtype,
         beam_size=beam_size,
         ctc_weight=ctc_weight,
