@@ -1,6 +1,7 @@
 import os
 import time
 import pytz
+from requests import delete
 from tqdm import tqdm, trange
 from datetime import datetime
 
@@ -96,7 +97,7 @@ class SplitOnSilenceDataset(Dataset):
         sound_file = AudioSegment.from_wav(self.audio_path)
 
         if sound_file.frame_rate != self.sampling_rate:
-            self.audio_path = self.audio2wav(self.audio_path, sampling_rate=self.sampling_rate)
+            self.audio_path = audio2wav(self.audio_path, sampling_rate=self.sampling_rate)
             sound_file = AudioSegment.from_wav(self.audio_path)
 
         if not os.path.exists(self.chunk_path):

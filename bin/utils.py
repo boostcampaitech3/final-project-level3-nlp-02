@@ -8,7 +8,7 @@ from pydub.silence import detect_nonsilent
 
 
 
-def audio2wav(self, audio_path, sampling_rate=16000):
+def audio2wav(audio_path, sampling_rate=16000):
     """
     음성 파일을 wav 파일로 변환하고 변환된 파일 경로를 return 합니다.
     """
@@ -18,8 +18,8 @@ def audio2wav(self, audio_path, sampling_rate=16000):
     audio_data = AudioSegment.from_file(audio_path, extension)
     audio_data = audio_data.set_frame_rate(sampling_rate)
     audio_data = audio_data.set_channels(1)
-    output_path = f"{path}.wav"
-    audio_data.export(output_path, format="wav", delete=True)
+    output_path = f"{path}_new.wav"
+    audio_data.export(output_path, format="wav")
 
     if audio_path == output_path:
         print(f"The sampling rate of input audio file is not {self.sampling_rate}, so it is converted and overwritten.")    
@@ -75,4 +75,4 @@ def split_on_silence(audio_segment, min_silence_len=1000, silence_thresh=-16, ke
     return ([
         audio_segment[ max(start,0) : min(end,len(audio_segment)) ]
         for start,end in output_ranges
-    ], np.array([start for start,end in output_ranges]))
+    ], np.array([start + keep_silence for start,end in output_ranges]))

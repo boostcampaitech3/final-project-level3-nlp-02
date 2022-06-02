@@ -26,7 +26,7 @@ ASR_MODEL_FILE = "/opt/ml/input/espnet-asr/.cache/espnet/e589f98042183b3a316257e
 CONFIG_FILE = "/opt/ml/input/espnet-asr/conf/fast_decode_asr_ksponspeech.yaml"
 
 BATCH_SIZE = 8
-AUDIO_PATH = "/opt/ml/input/sample_dataset/AAYN.wav"
+AUDIO_PATH = "/opt/ml/input/sample_dataset/ksw.wav"
 OUTPUT_TXT = "/opt/ml/input/result.txt"
 
 
