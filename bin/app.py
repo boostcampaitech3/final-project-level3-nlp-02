@@ -14,6 +14,7 @@ import numpy as np
 from pydub import AudioSegment
 from torch.utils.data.dataloader import DataLoader
 
+from utils import collate_fn
 from dataset import SplitOnSilenceDataset
 
 from asr_inference import Speech2Text
@@ -29,32 +30,6 @@ BATCH_SIZE = 8
 AUDIO_PATH = "/opt/ml/input/sample_dataset/ksw.wav"
 OUTPUT_TXT = "/opt/ml/input/result.txt"
 
-
-def collate_fn(batch):
-    speech_dict = dict()
-    speech_tensor = torch.tensor([])
-    timelines = []
-
-    audio_max_len = 0
-    for data, timeline in batch:
-        audio_max_len = max(audio_max_len, len(data))
-
-    for data, timeline in batch:
-        zero_tensor = torch.zeros((1, audio_max_len - len(data)))
-        data = torch.unsqueeze(data, 0)
-        tensor_with_pad = torch.cat((data, zero_tensor), dim=1)
-        speech_tensor = torch.cat((speech_tensor, tensor_with_pad), dim=0)
-        timelines.append(timeline)
-    
-    speech_dict['speech'] = speech_tensor
-    speech_dict['timeline'] = timelines
-
-    return speech_dict
-
-
-def downsampling(audio_file, sampling_rate=16000):
-    audio, rate = librosa.load(audio_file, sr=sampling_rate)
-    return audio, rate
 
 
 def main():

@@ -17,10 +17,6 @@ from utils import audio2wav, split_on_silence
 # from pydub.silence import split_on_silence, detect_nonsilent
 
 
-def downsampling(audio_file, sampling_rate=16000):
-    audio, rate = librosa.load(audio_file, sr=sampling_rate)
-    return audio, rate
-
 class SplitOnSilenceDataset(Dataset):
     """
     pytorch Dataset class

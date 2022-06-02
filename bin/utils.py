@@ -2,6 +2,7 @@ import os
 import itertools
 from requests import delete
 
+import torch
 import numpy as np
 from pydub import AudioSegment
 from pydub.silence import detect_nonsilent
@@ -76,3 +77,25 @@ def split_on_silence(audio_segment, min_silence_len=1000, silence_thresh=-16, ke
         audio_segment[ max(start,0) : min(end,len(audio_segment)) ]
         for start,end in output_ranges
     ], np.array([start + keep_silence for start,end in output_ranges]))
+
+
+def collate_fn(batch):
+    speech_dict = dict()
+    speech_tensor = torch.tensor([])
+    timelines = []
+
+    audio_max_len = 0
+    for data, timeline in batch:
+        audio_max_len = max(audio_max_len, len(data))
+
+    for data, timeline in batch:
+        zero_tensor = torch.zeros((1, audio_max_len - len(data)))
+        data = torch.unsqueeze(data, 0)
+        tensor_with_pad = torch.cat((data, zero_tensor), dim=1)
+        speech_tensor = torch.cat((speech_tensor, tensor_with_pad), dim=0)
+        timelines.append(timeline)
+    
+    speech_dict['speech'] = speech_tensor
+    speech_dict['timeline'] = timelines
+
+    return speech_dict
