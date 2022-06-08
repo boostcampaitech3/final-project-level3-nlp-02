@@ -15,7 +15,7 @@ from torch.utils.data.dataloader import DataLoader
 import torch
 import numpy as np
 from transformers import PreTrainedTokenizerFast, GPT2LMHeadModel
-from kobart import get_kobart_tokenizer
+# from kobart import get_kobart_tokenizer
 from transformers.models.bart import BartForConditionalGeneration
 # from konlpy.tag import Okt
 from itertools import combinations
@@ -24,7 +24,7 @@ from itertools import combinations
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 from dataset import SplitOnSilenceDataset
 from asr_inference import Speech2Text
-from utils import collate_fn, processing, post_process, dell_loop
+from utils import collate_fn, processing, post_process, dell_loop, get_split
 
 
 st.set_page_config(layout="wide")
@@ -76,10 +76,11 @@ def change_bool_state_true():
 #@st.cache
 @st.cache(hash_funcs={torch.nn.parameter.Parameter: lambda _: None})
 def load_model():
-    #model = BartForConditionalGeneration.from_pretrained('./kobart_summary')
-    #model = BartForConditionalGeneration.from_pretrained('./kobart_summary2_v_0')
-    model = BartForConditionalGeneration.from_pretrained('../kobart_summary2_v_1')
-    return model
+    #model_ = BartForConditionalGeneration.from_pretrained('./kobart_summary') # minjun 기본
+    #model_ = BartForConditionalGeneration.from_pretrained('./kobart_summary2_v_0') # minjun 합친거로 학습
+    # model_ = BartForConditionalGeneration.from_pretrained('../kobart_summary2_v_1') # minjun 합친거로 학습
+    model_ = BartForConditionalGeneration.from_pretrained('../kobart_summary4') # younhye
+    return model_
 
 
 def main():
@@ -126,7 +127,7 @@ def main():
         print(f"Total time: {time.time() - start_time}")
         print("JOB DONE!!!")
 
-    url = st.text_input("텍스트를 입력해주세요", type="default")
+    url = st.text_input("유튜브 링크를 넣어주세요.", type="default")
     # 텍스트 입력안내 문구
     if not url:
         st.write('유튜브 링크를 넣어주세요.')
@@ -193,6 +194,7 @@ def main():
     start_time = time.time()
     print("JOB START!!!")
     talk_list = list()
+    results = list()
     with st.spinner("STT 작업을 진행하고 있습니다"):
         for batch in loader:
             timelines = batch.pop("timeline")
@@ -244,48 +246,20 @@ def main():
 
     st.write("STT 작업이 완료되었습니다.")
 
-    model_summary = load_model()
-    # print(tokenizer)
-    # print(tokenizer.encode)
-    st.title("KoBART 요약 Test")
     temp_talk_list = [talk[1] for talk in talk_list]
-    text = ' '.join(map(str, temp_talk_list))
+    data = {
+        'talk_list': temp_talk_list,
+    }
 
-    # get_split(text, tokenizer.tokenize)
-    st.markdown("## KoBART 요약 결과")
-
-    with st.spinner('processing..'):
-        input_ids = tokenizer.encode(text)
-        #get_sentence(input_ids, 1024, model_summary)
-        input_ids = torch.tensor(input_ids)
-        input_ids = input_ids.unsqueeze(0) # 이 길이가 1024개 까지만 들어간다.
-        st.write(f'input_shape : {input_ids.shape}')
-        input_ids_list = input_ids.split(1000, dim=-1) # .으로 나누는 것 필요? 245
-
-        outputs = ""
-        for inputs in input_ids_list:
-            st.write(inputs.shape)
-            st.write('본문')
-            st.write(tokenizer.decode(inputs[0], skip_special_tokens = True))
-            output = model_summary.generate(inputs, eos_token_id=1, max_length=300, num_beams=10) # eos_token_id=1, max_length=100, num_beams=5)
-            output = tokenizer.decode(output[0], skip_special_tokens=True)
-            output = dell_loop(output)
-            outputs += output
-            st.write('요약')
-            st.write(output)
-
-    st.markdown("### 요약의 요약")
-    outputs = tokenizer.encode(outputs)
-    outputs = torch.tensor(outputs)
-    outputs = outputs.unsqueeze(0)
-    outputs = outputs.split(1024, dim=-1)[0]
-    output_ = model_summary.generate(outputs, eos_token_id=1, max_length=300, num_beams=5)
-    output_ = tokenizer.decode(output_[0], skip_special_tokens=True)
-    st.write(dell_loop(output_))
-
-    st.markdown("## keywords")
-    #get_keyword(text, top_n=10)
-
+    st.write("요약 작업이 진행중입니다.")
+    # 유튜브 음성파일을 가리키는 링크인지 확인하기.
+    response = requests.get(
+        url=f"{backend_address}/summary",
+        json=data
+    )
+    # print('####', response.json())
+    outputs = response.json()['outputs']
+    st.write(outputs)
   
 
 if __name__ == "__main__":
