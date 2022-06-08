@@ -18,6 +18,7 @@ import time
 # 상위 디렉토리에서 가져오기
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 from utils import dell_loop, get_split, make_specific_link
+from key_bert import load_embeddings, get_candidates, dist_keywords, max_sum_sim, mmr
 
 app = FastAPI()
 
@@ -35,12 +36,29 @@ def load_model():
     model_ = BartForConditionalGeneration.from_pretrained('../kobart_summary4') # younhye
     return model_
 
+
+def get_keyword(text: str, top_n: int=10):
+    candidates = get_candidates(text)
+    doc_embedding, candidate_embeddings = load_embeddings(text, candidates)
+
+    results = list()
+    results.append([dist_keywords(doc_embedding, candidate_embeddings, candidates, top_n=top_n)])
+    results.append([max_sum_sim(doc_embedding, candidate_embeddings, candidates, top_n=top_n, nr_candidates=top_n*2)])
+    results.append([mmr(doc_embedding, candidate_embeddings, candidates, top_n=top_n, diversity=0.7)])
+    print(dist_keywords(doc_embedding, candidate_embeddings, candidates, top_n=top_n))
+    print(max_sum_sim(doc_embedding, candidate_embeddings, candidates, top_n=top_n, nr_candidates=top_n*2))
+    print(mmr(doc_embedding, candidate_embeddings, candidates, top_n=top_n, diversity=0.7))
+    return results
+
+
 # "유튜브 링크" dict 데이터 유효성 체크해주는 pydantic
 class Url_check(BaseModel):
     url: str
 
+
 class list_check(BaseModel):
     talk_list: list
+
 
 # youtube link를 검증합니다.
 @app.post("/check_link", description="입력을 저장합니다.")
@@ -213,7 +231,7 @@ def get_summary(talk_list: list_check):
         output = model_summary.generate(input_ids, eos_token_id=1, max_length=200, num_beams=5) # eos_token_id=1, max_length=100, num_beams=5)
         output = tokenizer.decode(output[0], skip_special_tokens=True)
         output = dell_loop(output)
-        outputs += output.replace("'", "").replace(",", "")
+        outputs += output.replace("'", "").replace(",", "") + "\n"
         #st.write('요약')
         # print(output)
     # print("outputs:### ", outputs)
@@ -251,6 +269,23 @@ def get_summary2(talk_list: list_check):
         # print(output)
     print("outputs1000:### ", outputs)
     # 유효하면 정상 링크 안내
+    return JSONResponse(
+        status_code=200,
+        content={
+                "message": "완료", 
+                "outputs": outputs
+            }
+    )
+
+
+@app.get("/keyword")
+def extract_keyword(talk_list: list_check):
+    talk = talk_list.talk_list
+    # print(talk)
+    talk = ' '.join(talk)
+    print('!!!!', talk)
+    outputs = get_keyword(talk)
+
     return JSONResponse(
         status_code=200,
         content={
