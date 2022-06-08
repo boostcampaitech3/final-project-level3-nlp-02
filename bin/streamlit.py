@@ -117,7 +117,12 @@ def main():
         # # 음성을 가져와서 STT로 추출해보기
         with st.spinner("음성을 STT로 반환하고 있습니다."):
             # downsampling
-            audio, rate = downsampling(audio_file)
+            audio, rate = downsampling(audio_file) # librosa.load라서 40초 걸림
+            # scipy.io.wavfile
+            # wavfile.read() -> 1.5초
+            # numpy로 반환, 0, 32767 - Normalize시켜줘야 함.
+            # dataset.py __items__() 참고
+
 
             start_time = time.time()
             print("JOB START!!!")
