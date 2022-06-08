@@ -127,7 +127,15 @@ def main():
         print(f"Total time: {time.time() - start_time}")
         print("JOB DONE!!!")
 
-    url = st.text_input("유튜브 링크를 넣어주세요.", type="default")
+    choice_STT_mode = ['빠르게 STT', '정확하게 STT']
+    status = st.radio('1. 먼저 STT 방법 선택을 선택해주세요.', choice_STT_mode)
+
+    if status == choice_STT_mode[0]:
+        CONFIG_FILE = "/opt/ml/input/espnet-asr/conf/fast_decode_asr.yaml"
+    elif status == choice_STT_mode[1]:
+        CONFIG_FILE = "/opt/ml/input/espnet-asr/conf/decode_asr.yaml"
+
+    url = st.text_input("2. 유튜브 링크를 넣어주세요.", type="default")
     # 텍스트 입력안내 문구
     if not url:
         st.write('유튜브 링크를 넣어주세요.')
