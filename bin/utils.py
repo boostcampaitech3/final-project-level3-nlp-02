@@ -246,9 +246,9 @@ def get_split(text, tokenize_fn, n=3):
     # n개의 문장씩 문서를 묶음
     text_list = []
     n = 3
-    for i in range(len(split_list)-(n-1)):
+    for i in range(len(split_list) - (n - 1)):
         text_list.append('. '.join(split_list[i:i+n]))
-
+    
     # 누적 하고싶다면 주석 풀기, 근데 결과 별로
     # split_list = text.split('.')
     # sum_text = ""
@@ -256,8 +256,8 @@ def get_split(text, tokenize_fn, n=3):
     # for t in split_list:
     #     sum_text += t
     #     text_list.append(sum_text)
-    print(len(split_list)) # 159
-    print(len(text_list)) # 157
+    # print(len(split_list)) # 159
+    # print(len(text_list)) # 157
 
     # tfidf로 각 묶음 들 벡터화
     tfidf_vectorizer=TfidfVectorizer(
@@ -268,16 +268,16 @@ def get_split(text, tokenize_fn, n=3):
     tfidfv=tfidf_vectorizer.fit(text_list)
     tfidf_matrix = tfidfv.transform(text_list)
     #tfidf_matrix = tfidf_vectorizer.fit_transform(text_list)
-    print(tfidf_matrix.shape) # 157, 4084
-    print(tfidf_matrix[0].shape) # 1, 4084
+    # print(tfidf_matrix.shape) # 157, 4084
+    # print(tfidf_matrix[0].shape) # 1, 4084
     #print(tfidfv.vocabulary_)
 
     # 문장묶음의 유사도 층정
     similar = []
     for idx, (front, back) in enumerate(zip(tfidf_matrix[:-n], tfidf_matrix[n:])):
         similar.append([(cosine_similarity(front, back)).item(),idx])
-    print(similar)
-    print(len(similar)) # 154
+    # print(similar)
+    # print(len(similar)) # 154
 
 
     s_similar = sorted(similar, key=lambda x : x[0])
@@ -291,7 +291,7 @@ def get_split(text, tokenize_fn, n=3):
         _, point = s_similar.pop(0) # 가장 유사도 낮은 지점
         point += n # n개의 문장끼리 묶었으니 n 더해줘야 위치 맞음
         if point in done_split: # 나눠놓은 문장을 나누려고 하면 종료
-            print('문장안 접근', point)
+            # print('문장안 접근', point)
             return
 
         sp_c = sp[:] # sp_copy
@@ -300,12 +300,12 @@ def get_split(text, tokenize_fn, n=3):
         stick = sp_c.index(point) # 기준이 되는 인덱스 가져옴, 1
         up_p = sp_c[stick-1] # 기준점 위쪽의 문서들 시작 위치 0
         down_p = sp_c[stick+1] # 기준점 아래쪽의 문서들 끝 위치 159
-        print("####up,down,point", up_p, down_p, point, sp_c)
+        # print("####up,down,point", up_p, down_p, point, sp_c)
         up = split_list_tokenize[up_p:point]
         down = split_list_tokenize[point: down_p]
         up_len = sum([len(u_t) for u_t in up])
         down_len = sum([len(d_t) for d_t in down])
-        print(up_len, down_len)
+        # print(up_len, down_len)
         if up_len < min_len or down_len < min_len: # min_len 보다 작으면 자르지 않음
             return
         
@@ -324,13 +324,13 @@ def get_split(text, tokenize_fn, n=3):
     while True:
         #print(finished)
         done_split = sorted(done_split)
-        print(len(done_split), len(all_done))
+        # print(len(done_split), len(all_done))
         if done_split == all_done:
             break
         make_split()
 
     finished.sort(key=lambda x : x[1])
-    print(finished)
+    # print(finished)
     return finished
 
 
