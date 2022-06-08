@@ -18,8 +18,6 @@ from transformers import PreTrainedTokenizerFast, GPT2LMHeadModel
 from kobart import get_kobart_tokenizer
 from transformers.models.bart import BartForConditionalGeneration
 # from konlpy.tag import Okt
-from sklearn.metrics.pairwise import cosine_similarity
-from sklearn.feature_extraction.text import TfidfVectorizer
 from itertools import combinations
 
 # 상위 디렉토리에서 dataset 가져오기
@@ -247,7 +245,6 @@ def main():
     st.write("STT 작업이 완료되었습니다.")
 
     model_summary = load_model()
-    tokenizer = get_kobart_tokenizer()
     # print(tokenizer)
     # print(tokenizer.encode)
     st.title("KoBART 요약 Test")
