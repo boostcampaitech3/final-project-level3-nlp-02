@@ -39,7 +39,7 @@ CONFIG_FILE = "/opt/ml/input/espnet-asr/conf/fast_decode_asr.yaml"
 DOWNLOAD_FOLDER_PATH = "../../download/"
 
 # model load
-model_path='/opt/ml/input/espnet-asr/bin/model/'
+model_path='/opt/ml/input/espnet-asr/bin/postprocessing_model/'
 
 Q_TKN = "<usr>"
 A_TKN = "<sys>"
@@ -243,7 +243,8 @@ def main():
         print("JOB DONE!!!")
         print('!!!!', results, type(results))
 
-
+    st.write(talk_list)
+    
     st.write("STT 작업이 완료되었습니다.")
 
     temp_talk_list = [talk[1] for talk in talk_list]
@@ -260,6 +261,29 @@ def main():
     # print('####', response.json())
     outputs = response.json()['outputs']
     st.write(outputs)
+
+    data = {
+        'talk_list': temp_talk_list,
+    }
+
+    # print(type(data['talk_list']))
+    # print('@@@@', data['talk_list'])
+
+    response = requests.get(
+        # url=f"{backend_address}/summary",
+        url=f"{backend_address}/keyword",
+        json=data
+    )
+
+    # print('####', response.json())
+    # print(response)
+    # print(response.json())
+    results = response.json()['outputs']
+    for result in results:
+        st.write(','.join(map(str, result)))
+    # st.write(response.json()['outputs'][0])
+    # st.write(response.json()['outputs'][1])
+    # st.write(response.json()['outputs'][2])
   
 
 if __name__ == "__main__":
