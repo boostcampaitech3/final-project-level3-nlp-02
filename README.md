@@ -63,6 +63,8 @@ pip install streamlit_player
 pip install typeguard
 pip install espnet
 pip install espnet_model_zoo
+pip install transformers
+pip install pydub
 ```
 
 ### Back-end
@@ -78,6 +80,9 @@ pip install moviepy
 pip install git+https://github.com/SKT-AI/KoBART#egg=kobart
 pip install konlpy
 pip install sentence_transformers
+pip install fastapi
+pip install uvicorn
+pip install pydub
 apt-get update && apt install default-jdk
 ```
 
