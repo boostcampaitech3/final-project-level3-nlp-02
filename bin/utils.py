@@ -377,8 +377,9 @@ def summary_post_processing(generated_summary, discriminator, tokenizer, fill_mo
                 replace_word = result[i][0]['token_str']
                 masked_sentence = masked_sentence.replace("[MASK]", replace_word, 1)
             filled_sentence = masked_sentence
-            filled_sentence = filled_sentence.replace(' .', '.')
-        return filled_sentence.replace(' .', '.')
+        filled_sentence = filled_sentence.replace(' .', '.')
+        filled_sentence = filled_sentence.replace(' ##', '')
+        return filled_sentence
 
     return generated_summary
 
