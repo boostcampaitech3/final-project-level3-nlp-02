@@ -399,9 +399,8 @@ def get_tfidf_vec(input_list, tokenize_fn):
     '''
     text_list, sec_text_list = [], []
     for element in input_list:
-        for (sec, text) in element:
-            text_list.append(text)
-            sec_text_list.append([sec, text])
+        text_list.append(element[1])
+        sec_text_list.append([element[0], element[1]])
 
     # tfidf로 각 묶음 들 벡터화
     tfidf_vectorizer=TfidfVectorizer(
@@ -418,7 +417,6 @@ def get_similar(query, tfidfv, tfidf_matrix, sec_text_list, top_n=5):
     '''
     질문과 가장 유사한 문장을 top-n개 뽑아서 리스트 형태로 반환
     '''
-    query = [query]
     q = tfidfv.transform(query)
     #print(q.shape)
     similar_list = cosine_similarity(q, tfidf_matrix)[0]
