@@ -88,8 +88,15 @@ def main():
     if st.session_state.push_stop_button == False:
         st.session_state.youtube_scripts = list()
 
+    # 로고 보여주기
     image = Image.open('professor_logo.PNG')
-    st.image(image)
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col1:
+        st.write()
+    with col2:
+        st.image(image)
+    with col3:
+        st.write()
 
     ### 음성파일 업로드 ###
     # st.header("음성 파일을 올려주세요.")
