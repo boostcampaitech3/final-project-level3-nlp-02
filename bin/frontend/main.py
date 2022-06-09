@@ -19,6 +19,8 @@ from transformers import PreTrainedTokenizerFast, GPT2LMHeadModel
 from transformers.models.bart import BartForConditionalGeneration
 # from konlpy.tag import Okt
 from itertools import combinations
+# from ..mrc_utils.func import MRC
+from PIL import Image
 
 # 상위 디렉토리에서 dataset 가져오기
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
@@ -96,36 +98,41 @@ def main():
     if st.session_state.push_stop_button == False:
         st.session_state.youtube_scripts = list()
 
-    st.header("음성 파일을 올려주세요.")
-    with st.spinner("wait"):
-        uploaded_file = st.file_uploader("Upload a file", type=["pcm", "wav", "flac", "m4a"])
+    image = Image.open('professor_logo.PNG')
+    st.image(image)
 
-    if uploaded_file:
-        audio_file = save_uploaded_file("audio", uploaded_file)
+    ### 음성파일 업로드 ###
+    # st.header("음성 파일을 올려주세요.")
+    # with st.spinner("wait"):
+    #     uploaded_file = st.file_uploader("Upload a file", type=["pcm", "wav", "flac", "m4a"])
 
-        audio, rate = downsampling(audio_file)
+    # if uploaded_file:
+    #     audio_file = save_uploaded_file("audio", uploaded_file)
+
+    #     audio, rate = downsampling(audio_file)
         
-        start_time = time.time()
-        print("JOB START!!!")
+    #     start_time = time.time()
+    #     print("JOB START!!!")
 
-        with open(CONFIG_FILE) as f:
-            config = yaml.load(f, Loader=yaml.FullLoader)
+    #     with open(CONFIG_FILE) as f:
+    #         config = yaml.load(f, Loader=yaml.FullLoader)
 
-        with st.spinner("STT 작업을 진행하고 있습니다"):
-            speech2text = Speech2Text(
-                asr_train_config=ASR_TRAIN_CONFIG, 
-                asr_model_file=ASR_MODEL_FILE, 
-                device='cuda',
-                dtype='float32',
-                **config
-                )
+    #     with st.spinner("STT 작업을 진행하고 있습니다"):
+    #         speech2text = Speech2Text(
+    #             asr_train_config=ASR_TRAIN_CONFIG, 
+    #             asr_model_file=ASR_MODEL_FILE, 
+    #             device='cuda',
+    #             dtype='float32',
+    #             **config
+    #             )
 
-            result = speech2text(audio)
+    #         result = speech2text(audio)
 
-            st.write(result[0][0])
+    #         st.write(result[0][0])
 
-        print(f"Total time: {time.time() - start_time}")
-        print("JOB DONE!!!")
+    #     print(f"Total time: {time.time() - start_time}")
+    #     print("JOB DONE!!!")
+    ###
 
     choice_STT_mode = ['빠르게 STT', '정확하게 STT']
     status = st.radio('1. 먼저 STT 방법 선택을 선택해주세요.', choice_STT_mode)
@@ -250,8 +257,6 @@ def main():
         print(f"Total time: {end_time - start_time}")
         print("JOB DONE!!!")
         print('!!!!', results, type(results))
-
-    st.write(talk_list)
     
     st.write("STT 작업이 완료되었습니다.")
 
@@ -263,35 +268,62 @@ def main():
     st.write("요약 작업이 진행중입니다.")
     # 유튜브 음성파일을 가리키는 링크인지 확인하기.
     response = requests.get(
-        url=f"{backend_address}/summary",
+        url=f"{backend_address}/summary_before",
         json=data
     )
     # print('####', response.json())
     outputs = response.json()['outputs']
     st.write(outputs)
 
+    ### 키워드 추출하기 ###
     data = {
         'talk_list': temp_talk_list,
     }
 
-    # print(type(data['talk_list']))
-    # print('@@@@', data['talk_list'])
-
     response = requests.get(
-        # url=f"{backend_address}/summary",
         url=f"{backend_address}/keyword",
         json=data
     )
 
-    # print('####', response.json())
-    # print(response)
-    # print(response.json())
     results = response.json()['outputs']
     for result in results:
         st.write(','.join(map(str, result)))
-    # st.write(response.json()['outputs'][0])
-    # st.write(response.json()['outputs'][1])
-    # st.write(response.json()['outputs'][2])
+    ###
+
+
+    ### MRC ###
+    # st.title("무엇이든 물어보세요!")
+    
+    # query = st.text_input("질문을 입력해주세요")
+    # context = ' '.join(map(str, temp_talk_list))
+
+    # if query != '' and context != '':
+    #     prediction = MRC(query, context)
+
+
+    # if st.button("알려주세요!"):    
+    #     st.subheader(f'정답은??! {prediction}'.format(prediction))
+    ###
+
+    ### Timeline MRC
+    query = st.text_input('query를 입력하세요.')
+
+    if query:
+        data = {
+            'question': [query],
+            'talk_list': temp_talk_list,
+        }
+        print('#@!#@!', type(data), data)
+        # print('!@#!@#', data.question)
+
+        response = requests.get(
+            url=f"{backend_address}/query",
+            json=data
+        )
+
+        print('@@@@', response.json())
+        st.write('####', response.json())
+    ###
   
 
 if __name__ == "__main__":
