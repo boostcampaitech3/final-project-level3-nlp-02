@@ -31,9 +31,9 @@ DOWNLOAD_FOLDER_PATH = "../../download/"
 #@st.cache
 # @st.cache(hash_funcs={torch.nn.parameter.Parameter: lambda _: None})
 def load_model():
-    model_ = BartForConditionalGeneration.from_pretrained('../kobart_summary') # minjun 기본
+    # model_ = BartForConditionalGeneration.from_pretrained('../kobart_summary') # minjun 기본
     #model_ = BartForConditionalGeneration.from_pretrained('../kobart_summary2_v_0') # minjun 합친거로 학습
-    # model_ = BartForConditionalGeneration.from_pretrained('../kobart_summary2_v_1') # minjun 합친거로 학습
+    model_ = BartForConditionalGeneration.from_pretrained('../kobart_summary2_v_1') # minjun 합친거로 학습
     #model_ = BartForConditionalGeneration.from_pretrained('../kobart_summary4') # younhye
     return model_
 
