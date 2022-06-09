@@ -97,13 +97,26 @@ apt-get update && apt install default-jdk
 
 **Postprocessing pre-train model**을 다운로드 받으려면
 [여기](https://drive.google.com/file/d/1VlImbs9qh3mwVZmPcVZj3DDMv_p9CFtK/view?usp=sharing)
-를 클릭하세요.
+를 클릭하세요.  
+모델은 압축을 풀어 ~~/espnet-asr/bin 에 postprocessing_model이라는 이름으로 넣습니다  
+모델 폴더 경로 : ~~/espnet-asr/bin/postprocessing_model
 
 **kobart pre-train model**을 다운로드 받으려면
 [여기](https://drive.google.com/file/d/1A_ZVu8DtL-3rmxUaGOKWl7AMtbktivG7/view?usp=sharing)
-를 클릭하세요.
+를 클릭하세요.  
+모델은 압축을 풀어 ~~/espnet-asr/bin 에 kobart_summary(frontend/main.py에 있는 load_model() 경로에 맞춰서)이라는 이름으로 넣습니다  
+모델 폴더 경로 : ~~/espnet-asr/bin/kobart_summary
 
 
+# 실행방법  
+shell의 cd 기능을 이용하여 다음 폴더로 이동한 뒤, 다음 명령어를 통해 실행시킵니다.  
+## frontend  
+~~/espnet-asr/bin/frontend  
+sh frontend.sh  
+
+## backend  
+~~ /espnet-asr/bin/backend  
+python main.py  
 
 
 
