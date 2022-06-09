@@ -301,7 +301,7 @@ def main():
     if query:
         data = {
             'question': [query],
-            'talk_list': temp_talk_list,
+            'talk_list': talk_list,
         }
         print('#@!#@!', type(data), data)
         # print('!@#!@#', data.question)
