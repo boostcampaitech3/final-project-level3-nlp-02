@@ -288,7 +288,7 @@ def get_summary2(talk_list: list_check):
         ## 후처리
         output = summary_post_processing(generated_summary=output, discriminator=discriminator, tokenizer=electra_tokenizer, fill_model=fill_model)
         outputs += output
-        
+    outputs = dell_loop(outputs)
     print("outputs1000:### ", outputs)
     # 유효하면 정상 링크 안내
     return JSONResponse(

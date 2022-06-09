@@ -242,7 +242,7 @@ def get_split(talk_list, tokenize_fn, n=3):
     split_list = talk_list
     split_list_tokenize = [tokenize_fn(string) for string in split_list] # split_list 토큰화 함
     if sum([len(sp_t) for sp_t in split_list_tokenize]) < min_len:
-        return [" ".join(talk_list), 0]
+        return [[talk_list, 0]]
     print('****split_list', len(split_list), split_list)
     # n개의 문장씩 문서를 묶음
     text_list = []
