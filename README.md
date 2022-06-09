@@ -1,3 +1,63 @@
+# 최종 프로젝트
+
+![youtube_professor](https://user-images.githubusercontent.com/76618935/172767342-7c220388-39c1-441e-ab2c-e402e81db769.png)
+
+원하는 유튜브 영상을 STT를 통한 **text 추출** 및 **요약, 키워드 추출, MRC**를 지원하는 서비스입니다.
+
+
+# How to use
+
+## 0. Creating virtual environment
+
+위 서비스를 제대로 실행하기 위해서는 front-end와 back-end을 서로 다른 가상환경에서 실행해야 합니다.
+
+```conda create -n frontend python=3.8.13```
+
+```conda create -n backend python=3.8.13```
+
+## 1. Installation
+
+### Front-end
+
+```conda activate frontend```
+
+```bash
+(frontend)
+pip install streamlit
+pip install streamlit_player
+pip install typeguard
+pip install espnet
+pip install espnet_model_zoo
+```
+
+### Back-end
+
+```conda activate backend```
+
+```bash
+(backend)
+pip install pytube
+pip install moviepy
+pip install git+https://github.com/SKT-AI/KoBART#egg=kobart
+pip install konlpy
+pip install sentence_transformers
+apt-get update && apt install default-jdk
+```
+
+## 2. Downloading pre-train models
+
+Post processing model을 다운로드 받으려면
+[여기](https://drive.google.com/file/d/1VlImbs9qh3mwVZmPcVZj3DDMv_p9CFtK/view?usp=sharing)
+를 클릭하세요.
+
+요약 모델을 다운로드 받으려면
+[여기](https://drive.google.com/file/d/1A_ZVu8DtL-3rmxUaGOKWl7AMtbktivG7/view?usp=sharing)
+를 클릭하세요.
+
+
+
+
+
 # espnet-asr
 *espnet-asr* is an End-to-end Automatic Speech Recognition (ASR) system using [ESPnet](https://github.com/espnet/espnet).
 
