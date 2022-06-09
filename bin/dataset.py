@@ -43,7 +43,7 @@ class SplitOnSilenceDataset(Dataset):
                             a split. default: 1000ms
 
             silence_thresh (in dBFS): anything quieter than this will be
-                            considered silence. default: -16dBFS
+                            considered silence. default: -40dBFS
 
             keep_silence (in ms or True/False): leave some silence at the beginning
                             and end of the chunks. Keeps the sound from sounding like it
