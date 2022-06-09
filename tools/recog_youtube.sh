@@ -39,7 +39,7 @@ EOF
 
 log "$0 $*"
 
-. utils/parse_options.sh
+. /opt/ml/input/espnet-asr/utils/parse_options.sh
 
 if [ $# -ne 0 ]; then 
   log "${help_message}"
@@ -52,7 +52,8 @@ fi
 [ -z "${mdl}" ] && { log "${help_message}"; log "Error: --mdl is required"; exit 2; };
 
 split_dir=${download_dir}/split
-wav_scp=${download_dir}/wav.scp
+# wav_scp=${download_dir}/wav.scp
+wav_scp=${download_dir}/${url}.wav
 
 [ ! -d ${split_dir} ] && mkdir -p ${split_dir}
 
@@ -61,7 +62,7 @@ if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
   [[ -f "${wav_scp}" ]] && rm ${wav_scp}
 
   youtube-dl --extract-audio --audio-format wav -o "${download_dir}/${url}.%(ext)s" "${url}"
-  sox -t wav "${download_dir}/${url}.wav" -r 16000 -t wav -c 1 "${split_dir}/${url}.wav" trim 0 ${length}  : newfile : restart
+  # sox -t wav "${download_dir}/${url}.wav" -r 16000 -t wav -c 1 "${split_dir}/${url}.wav" trim 0 ${length}  : newfile : restart
 
   for wav_file in $(find -L $split_dir -iname "*.wav" | sort); do
     key=$(basename "${wav_file%.*}")
@@ -69,11 +70,11 @@ if [ ${stage} -le 1 ] && [ ${stop_stage} -ge 1 ]; then
   done  
 fi
 
-if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
-  python3 bin/asr_inference.py \
-    --ngpu ${ngpu} \
-    --mdl ${mdl} \
-    --wav_scp ${wav_scp} \
-    --config ${config} \
-    --output_dir ${output}/${url}
-fi
+# if [ ${stage} -le 2 ] && [ ${stop_stage} -ge 2 ]; then
+#   python3 bin/asr_inference.py \
+#     --ngpu ${ngpu} \
+#     --mdl ${mdl} \
+#     --wav_scp ${wav_scp} \
+#     --config ${config} \
+#     --output_dir ${output}/${url}
+# fi
