@@ -249,6 +249,8 @@ def main():
         print('!!!!', results, type(results))
     
     st.write("STT 작업이 완료되었습니다.")
+    print('len_talk_list',len(talk_list))
+    print('talk_list',talk_list)
 
     temp_talk_list = [talk[1] for talk in talk_list]
     data = {
@@ -258,7 +260,8 @@ def main():
     st.write("요약 작업이 진행중입니다.")
     # 유튜브 음성파일을 가리키는 링크인지 확인하기.
     response = requests.get(
-        url=f"{backend_address}/summary_before",
+        url=f"{backend_address}/summary",
+        #url=f"{backend_address}/summary_before",
         json=data
     )
     # print('####', response.json())
@@ -301,7 +304,7 @@ def main():
     if query:
         data = {
             'question': [query],
-            'talk_list': temp_talk_list,
+            'talk_list': talk_list,
         }
         print('#@!#@!', type(data), data)
         # print('!@#!@#', data.question)
