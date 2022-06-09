@@ -109,8 +109,8 @@ def download_voice(specific_url):
     return
 
 
-# @st.cache()
-def divide_data(specific_url):
+# @st.cache(hash_funcs={torch.jit._script.RecursiveScriptModule : lambda _: None})
+def divide_data(specific_url, CONFIG_FILE):
     ### config file 설정 ###
     with open(CONFIG_FILE) as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
@@ -194,8 +194,8 @@ def set_summary(talk_list):
     st.write("요약 작업이 진행중입니다.")
     # 유튜브 음성파일을 가리키는 링크인지 확인하기.
     response = requests.get(
-        url=f"{backend_address}/summary", # cos 유사도로 끊기
-        # url=f"{backend_address}/summary_before", # 1000자씩 끊기
+        # url=f"{backend_address}/summary", # cos 유사도로 끊기
+        url=f"{backend_address}/summary_before", # 1000자씩 끊기
         json=data
     )
     # print('####', response.json())
@@ -244,8 +244,6 @@ def main():
     with col3:
         st.write()
     ###
-    
-    # main_col1, main_col2 = st.columns([1, 1])
 
     ### 음성파일 업로드 ###
     # st.header("음성 파일을 올려주세요.")
@@ -324,7 +322,7 @@ def main():
     ###
 
     ### 데이터 나누기 ###
-    talk_list = divide_data(specific_url)
+    talk_list = divide_data(specific_url, CONFIG_FILE)
     ###
 
     ### 요약하기 ###
@@ -368,7 +366,7 @@ def main():
         print('@@@@', response.json()['outputs'])
         st.write("관련 있는 문장은 다음과 같습니다.")
         for text_result in response.json()['outputs']:
-            st.write(text_result[1])
+            st.write(text_result[0], text_result[1])
         # st.write('####', response.json()['outputs'])
     ###
   
