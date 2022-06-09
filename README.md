@@ -22,12 +22,9 @@
 │   │   ├── postprocessing
 │   │   └── kobart_summary2_v_1
 │   │   
-│   ├── app.py
 │   ├── asr_inference.py
 │   ├── dataset.py
 │   ├── key_bert.py
-│   ├── korean_lecture.py
-│   ├── streamlit.py
 │   └── utils.py
 │
 └── conf
