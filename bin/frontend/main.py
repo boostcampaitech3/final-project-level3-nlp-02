@@ -194,8 +194,8 @@ def set_summary(talk_list):
     st.write("요약 작업이 진행중입니다.")
     # 유튜브 음성파일을 가리키는 링크인지 확인하기.
     response = requests.get(
-        # url=f"{backend_address}/summary", # cos 유사도로 끊기
-        url=f"{backend_address}/summary_before", # 1000자씩 끊기
+        url=f"{backend_address}/summary", # cos 유사도로 끊기
+        # url=f"{backend_address}/summary_before", # 1000자씩 끊기
         json=data
     )
     # print('####', response.json())
