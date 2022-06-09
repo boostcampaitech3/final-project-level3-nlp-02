@@ -235,14 +235,18 @@ def dell_loop(text):
 
 
 def get_split(text, tokenize_fn, n=3):
+    print('####split', text)
+    # text = ' '.join(text)
+    # print('####join', text)
 
     min_len, max_len = 200, 1024
 
-    split_list = text.split('.') # 문서 .으로 나눠놓음
+    # split_list = text.split('.') # 문서 .으로 나눠놓음
+    split_list = text
     split_list_tokenize = [tokenize_fn(string) for string in split_list] # split_list 토큰화 함
     if sum([len(sp_t) for sp_t in split_list_tokenize]) < min_len:
         return text
-
+    print('****split_list', len(split_list), split_list)
     # n개의 문장씩 문서를 묶음
     text_list = []
     n = 3
@@ -265,6 +269,7 @@ def get_split(text, tokenize_fn, n=3):
         ngram_range=(1, 2), 
         #max_features=50000,
         )
+    print('####text_list', text_list)
     tfidfv=tfidf_vectorizer.fit(text_list)
     tfidf_matrix = tfidfv.transform(text_list)
     #tfidf_matrix = tfidf_vectorizer.fit_transform(text_list)
@@ -348,4 +353,69 @@ def make_specific_link(youtube_link):
         specific_link = specific_link.split('?v=')[1].split('&')[0]
 
     return specific_link
+
+
+def summary_post_processing(generated_summary, discriminator, tokenizer, fill_model, threshold = 0.5):
+
+    generated_tokens = tokenizer.tokenize(generated_summary)
+    generated_inputs = tokenizer.encode(generated_summary, return_tensors="pt")
+
+    discriminator_outputs = discriminator(generated_inputs)
+    predictions = torch.sigmoid(discriminator_outputs[0]) # 0~1로 반환
+    masked_tokens = ["[MASK]" if x>=threshold else generated_tokens[i] for i, x in enumerate(predictions[0][1:-1])]
+    masked_sentence = tokenizer.convert_tokens_to_string(masked_tokens)
+
+    if "[MASK]" in masked_tokens:
+        result = fill_model(masked_sentence)
+        mask_cnt = len(result)
+  
+        if mask_cnt == 1:
+            filled_sentence = result[0]['sequence']
+
+        elif mask_cnt > 1:
+            for i in range(mask_cnt):
+                replace_word = result[i][0]['token_str']
+                masked_sentence = masked_sentence.replace("[MASK]", replace_word, 1)
+            filled_sentence = masked_sentence
+            filled_sentence = filled_sentence.replace(' .', '.')
+        return filled_sentence.replace(' .', '.')
+
+    return generated_summary
+
+
+def get_tfidf_vec(input_list, tokenize_fn):
+    '''
+    stt로 떨군 list 받아서 평탄화
+    tfidf 로 벡터화
+    tfidf 모델과 벡터, 평탄화한 list 반환
+    '''
+    text_list, sec_text_list = [], []
+    for element in input_list:
+        for (sec, text) in element:
+            text_list.append(text)
+            sec_text_list.append([sec, text])
+
+    # tfidf로 각 묶음 들 벡터화
+    tfidf_vectorizer=TfidfVectorizer(
+        tokenizer=tokenize_fn, 
+        ngram_range=(1, 2), 
+        #max_features=50000,
+        )
+    tfidfv=tfidf_vectorizer.fit(text_list)
+    tfidf_matrix = tfidfv.transform(text_list)
+    return tfidfv, tfidf_matrix, sec_text_list
+
+
+def get_similar(query, tfidfv, tfidf_matrix, sec_text_list, top_n=5):
+    '''
+    질문과 가장 유사한 문장을 top-n개 뽑아서 리스트 형태로 반환
+    '''
+    query = [query]
+    q = tfidfv.transform(query)
+    #print(q.shape)
+    similar_list = cosine_similarity(q, tfidf_matrix)[0]
+    similar_list_argsort = similar_list.argsort()[::-1]
+    result = [sec_text_list[i] for i in similar_list_argsort[:top_n]]
+    print(result)
+    return result
 
