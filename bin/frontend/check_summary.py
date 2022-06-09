@@ -27,6 +27,7 @@ sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 from dataset import SplitOnSilenceDataset
 from asr_inference import Speech2Text
 from utils import collate_fn, processing, post_process, dell_loop, get_split
+from mrc_utils.func import MRC
 
 
 st.set_page_config(layout="wide")
@@ -246,8 +247,9 @@ def main():
     트랜스포머보다 더 깊게 이해하고 싶으신 분들은 여기에 내 프랑스 참조의식을 바랍니다
     비디오 시청 얼 응 언제나 감사드리고요 이 비디오가 트랜스포머에 대한 이의 큰 도움에 되길 바랍니다
     자 그럼 타운 비디에서 뵐게요 감사합니다"""]
+
     text = ''.join(map(str, talk_list))
-    # print(text)
+    print(text)
     talk_list = text.split('\n')
     model_summary = load_model()
     _ = model_summary.eval()
@@ -260,14 +262,14 @@ def main():
     # if '.' not in text:
     #     text = re.sub(r'\n',r'. ', text)
 
-    # data = {
-    #     'talk_list': temp_talk_list,
-    # }
+    data = {
+        'talk_list': temp_talk_list,
+    }
 
-    # # 유튜브 음성파일을 가리키는 링크인지 확인하기.
+    # # # 유튜브 음성파일을 가리키는 링크인지 확인하기.
     # response = requests.get(
-    #     # url=f"{backend_address}/summary",
-    #     url=f"{backend_address}/summary_before",
+    #     url=f"{backend_address}/summary",
+    #     # url=f"{backend_address}/summary_before",
     #     json=data
     # )
 
@@ -275,26 +277,59 @@ def main():
     # # print(outputs)
     # st.write(outputs)
 
-    data = {
-        'talk_list': temp_talk_list,
-    }
+    # data = {
+    #     'talk_list': temp_talk_list,
+    # }
 
-    print(type(data['talk_list']))
-    print('@@@@', data['talk_list'])
+    # print(type(data['talk_list']))
+    # print('@@@@', data['talk_list'])
 
-    response = requests.get(
-        # url=f"{backend_address}/summary",
-        url=f"{backend_address}/keyword",
-        json=data
-    )
+    # response = requests.get(
+    #     # url=f"{backend_address}/summary",
+    #     url=f"{backend_address}/keyword",
+    #     json=data
+    # )
 
-    print('####', response.json())
-    print(response)
-    print(response.json())
+    # print('####', response.json())
+    # print(response)
+    # print(response.json())
     
-    results = response.json()['outputs']
-    for result in results:
-        st.write(','.join(map(str, result)))
+    # results = response.json()['outputs']
+    # for result in results:
+    #     st.write(','.join(map(str, result)))
+    ###
+
+    query = st.text_input('query를 입력하세요.')
+
+    if query:
+        data = {
+            'question': [query],
+            'talk_list': temp_talk_list,
+        }
+        print('#@!#@!', type(data), data)
+        # print('!@#!@#', data.question)
+
+        response = requests.get(
+            # url=f"{backend_address}/summary",
+            url=f"{backend_address}/query",
+            json=data
+        )
+
+        print('@@@@', response.json())
+        st.write('####', response.json())
+    ### MRC ###
+    # st.title("무엇이든 물어보세요!")
+    
+    # query = st.text_input("질문을 입력해주세요")
+    # context = ' '.join(map(str, temp_talk_list))
+
+    # if query != '' and context != '':
+    #     prediction = MRC(query, context)
+    #     st.write("정답은:", prediction)
+
+    # if st.button("알려주세요!"):    
+    #     st.subheader(f'정답은??! {prediction}'.format(prediction))
+    ###
 
 
 
