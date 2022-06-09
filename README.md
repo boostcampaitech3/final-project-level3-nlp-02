@@ -5,8 +5,40 @@
 원하는 유튜브 영상을 STT를 통한 **text 추출** 및 **요약, 키워드 추출, MRC**를 지원하는 서비스입니다.
 
 
-# How to use
+## 저장소 구조
 
+```
+.
+├── bin
+│   ├── frontend
+│   │   ├── main.py
+│   │   ├── frontend.sh
+│   │   └── check_summary.py
+│   │
+│   ├── backend
+│   │   └── main.py
+│   │
+│   ├── models
+│   │   ├── postprocessing
+│   │   └── kobart_summary2_v_1
+│   │   
+│   ├── app.py
+│   ├── asr_inference.py
+│   ├── dataset.py
+│   ├── key_bert.py
+│   ├── korean_lecture.py
+│   ├── streamlit.py
+│   └── utils.py
+│
+└── conf
+    ├── decode_asr.yaml
+    ├── fast_decode_asr.yaml
+    └── fast_decode_asr_ksponspeech.yaml
+
+```
+
+
+# How to use
 ## 0. Creating virtual environment
 
 위 서비스를 제대로 실행하기 위해서는 front-end와 back-end을 서로 다른 가상환경에서 실행해야 합니다.
