@@ -75,69 +75,8 @@ def change_bool_state_true():
     st.session_state.push_stop_button = True
 
 
-def main():
-    # push button이 없으면 설정해줌
-    if 'push_stop_button' not in st.session_state:
-        st.session_state.push_stop_button = False
-
-    # 전체 대사가 없으면 설정해줌
-    if 'youtube_scripts' not in st.session_state:
-        st.session_state.youtube_scripts = list()
-
-    # stop_button을 눌러서 온 게 아니라면 초기화
-    if st.session_state.push_stop_button == False:
-        st.session_state.youtube_scripts = list()
-
-    image = Image.open('professor_logo.PNG')
-    st.image(image)
-
-    ### 음성파일 업로드 ###
-    # st.header("음성 파일을 올려주세요.")
-    # with st.spinner("wait"):
-    #     uploaded_file = st.file_uploader("Upload a file", type=["pcm", "wav", "flac", "m4a"])
-
-    # if uploaded_file:
-    #     audio_file = save_uploaded_file("audio", uploaded_file)
-
-    #     audio, rate = downsampling(audio_file)
-        
-    #     start_time = time.time()
-    #     print("JOB START!!!")
-
-    #     with open(CONFIG_FILE) as f:
-    #         config = yaml.load(f, Loader=yaml.FullLoader)
-
-    #     with st.spinner("STT 작업을 진행하고 있습니다"):
-    #         speech2text = Speech2Text(
-    #             asr_train_config=ASR_TRAIN_CONFIG, 
-    #             asr_model_file=ASR_MODEL_FILE, 
-    #             device='cuda',
-    #             dtype='float32',
-    #             **config
-    #             )
-
-    #         result = speech2text(audio)
-
-    #         st.write(result[0][0])
-
-    #     print(f"Total time: {time.time() - start_time}")
-    #     print("JOB DONE!!!")
-    ###
-
-    choice_STT_mode = ['빠르게 STT', '정확하게 STT']
-    status = st.radio('1. 먼저 STT 방법 선택을 선택해주세요.', choice_STT_mode)
-
-    if status == choice_STT_mode[0]:
-        CONFIG_FILE = "/opt/ml/input/espnet-asr/conf/fast_decode_asr.yaml"
-    elif status == choice_STT_mode[1]:
-        CONFIG_FILE = "/opt/ml/input/espnet-asr/conf/decode_asr.yaml"
-
-    url = st.text_input("2. 유튜브 링크를 넣어주세요.", type="default")
-    # 텍스트 입력안내 문구
-    if not url:
-        st.write('유튜브 링크를 넣어주세요.')
-        return
-
+# @st.cache()
+def verfity_link(url):
     data = {
         'url': url,
     }
@@ -149,13 +88,15 @@ def main():
     )
     
     if response.status_code == 400:
-        st.write('유튜브 링크 형식이 잘못되었습니다.')
-        return
+        return False
+    
     specific_url = response.json()['url']
+    return specific_url
 
-    # 유튜브 영상 삽입
+
+# @st.cache()
+def download_voice(specific_url):
     st_player(f"https://youtu.be/{specific_url}")
-
     data = {
         'url': specific_url,
     }
@@ -165,22 +106,12 @@ def main():
             url=f"{backend_address}/set_voice",
             json=data
         )
+    return
 
-    # 음성 파일 STT 돌리기
-    st.write("음성 추출이 완료되었습니다.")
-    st.write("STT 작업을 진행합니다.")
-    if st.button(label="작업 중지하기", on_click=change_bool_state_true()):
-        st.warning('작업을 중지합니다.')
-        if st.button("다시 시작하기"):
-            st.session_state.youtube_scripts = list()
-            st.write('다시 시작합니다.')
-        if st.session_state.youtube_scripts:
-            for word in st.session_state.youtube_scripts:
-                st.write(word[0], word[1])
-            st.session_state.push_stop_button = False
 
-        st.stop()
-    # config file 설정
+# @st.cache(hash_funcs={torch.jit._script.RecursiveScriptModule : lambda _: None})
+def divide_data(specific_url, CONFIG_FILE):
+    ### config file 설정 ###
     with open(CONFIG_FILE) as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
 
@@ -191,7 +122,8 @@ def main():
         dtype='float32',
         **config
     )
-    
+    ###
+
     st.write('데이터를 나누고 있습니다.')
     dataset = SplitOnSilenceDataset(f'{DOWNLOAD_FOLDER_PATH}{specific_url}/{specific_url}.wav')
     loader = DataLoader(dataset, batch_size=BATCH_SIZE, collate_fn=collate_fn)
@@ -249,7 +181,11 @@ def main():
         print('!!!!', results, type(results))
     
     st.write("STT 작업이 완료되었습니다.")
+    return talk_list
 
+
+# @st.cache()
+def set_summary(talk_list):
     temp_talk_list = [talk[1] for talk in talk_list]
     data = {
         'talk_list': temp_talk_list,
@@ -258,14 +194,18 @@ def main():
     st.write("요약 작업이 진행중입니다.")
     # 유튜브 음성파일을 가리키는 링크인지 확인하기.
     response = requests.get(
-        url=f"{backend_address}/summary_before",
+        url=f"{backend_address}/summary", # cos 유사도로 끊기
+        # url=f"{backend_address}/summary_before", # 1000자씩 끊기
         json=data
     )
     # print('####', response.json())
     outputs = response.json()['outputs']
     st.write(outputs)
+    return temp_talk_list
 
-    ### 키워드 추출하기 ###
+
+# @st.cache()
+def get_keyword(temp_talk_list):
     data = {
         'talk_list': temp_talk_list,
     }
@@ -278,8 +218,120 @@ def main():
     results = response.json()['outputs']
     for result in results:
         st.write(','.join(map(str, result)))
+    return
+
+
+def main():
+    # push button이 없으면 설정해줌
+    if 'push_stop_button' not in st.session_state:
+        st.session_state.push_stop_button = False
+
+    # 전체 대사가 없으면 설정해줌
+    if 'youtube_scripts' not in st.session_state:
+        st.session_state.youtube_scripts = list()
+
+    # stop_button을 눌러서 온 게 아니라면 초기화
+    if st.session_state.push_stop_button == False:
+        st.session_state.youtube_scripts = list()
+
+    ### 로고 보여주기 ###
+    image = Image.open('professor_logo.PNG')
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col1:
+        st.write()
+    with col2:
+        st.image(image)
+    with col3:
+        st.write()
     ###
 
+    ### 음성파일 업로드 ###
+    # st.header("음성 파일을 올려주세요.")
+    # with st.spinner("wait"):
+    #     uploaded_file = st.file_uploader("Upload a file", type=["pcm", "wav", "flac", "m4a"])
+
+    # if uploaded_file:
+    #     audio_file = save_uploaded_file("audio", uploaded_file)
+
+    #     audio, rate = downsampling(audio_file)
+        
+    #     start_time = time.time()
+    #     print("JOB START!!!")
+
+    #     with open(CONFIG_FILE) as f:
+    #         config = yaml.load(f, Loader=yaml.FullLoader)
+
+    #     with st.spinner("STT 작업을 진행하고 있습니다"):
+    #         speech2text = Speech2Text(
+    #             asr_train_config=ASR_TRAIN_CONFIG, 
+    #             asr_model_file=ASR_MODEL_FILE, 
+    #             device='cuda',
+    #             dtype='float32',
+    #             **config
+    #             )
+
+    #         result = speech2text(audio)
+
+    #         st.write(result[0][0])
+
+    #     print(f"Total time: {time.time() - start_time}")
+    #     print("JOB DONE!!!")
+    ###
+
+    ### STT 유형, 링크 입력받기
+    choice_STT_mode = ['빠르게 STT', '정확하게 STT']
+    status = st.radio('1. 먼저 STT 방법 선택을 선택해주세요.', choice_STT_mode)
+
+    if status == choice_STT_mode[0]:
+        CONFIG_FILE = "/opt/ml/input/espnet-asr/conf/fast_decode_asr.yaml"
+    elif status == choice_STT_mode[1]:
+        CONFIG_FILE = "/opt/ml/input/espnet-asr/conf/decode_asr.yaml"
+
+    url = st.text_input("2. 유튜브 링크를 넣어주세요.", type="default")
+    # 텍스트 입력안내 문구
+    if not url:
+        st.write('유튜브 링크를 넣어주세요.')
+        return
+    ###
+
+    ### 유튜브 링크 체크 ###
+    specific_url = verfity_link(url)
+    if specific_url == False:
+        st.write('유튜브 링크 형식이 잘못되었습니다.')
+        return
+    ###
+
+    ### 유튜브 영상 삽입 ###
+    download_voice(specific_url)
+    ###
+
+    ### 음성 파일 STT 돌리기 ###
+    st.write("음성 추출이 완료되었습니다.")
+    st.write("STT 작업을 진행합니다.")
+    if st.button(label="작업 중지하기", on_click=change_bool_state_true()):
+        st.warning('작업을 중지합니다.')
+        if st.button("다시 시작하기"):
+            st.session_state.youtube_scripts = list()
+            st.write('다시 시작합니다.')
+        if st.session_state.youtube_scripts:
+            for word in st.session_state.youtube_scripts:
+                st.write(word[0], word[1])
+            st.session_state.push_stop_button = False
+
+        st.stop()
+    ###
+
+    ### 데이터 나누기 ###
+    talk_list = divide_data(specific_url, CONFIG_FILE)
+    ###
+
+    ### 요약하기 ###
+    temp_talk_list = set_summary(talk_list)
+    ###
+
+    ### 키워드 추출하기 ###
+    get_keyword(temp_talk_list)
+    ###
 
     ### MRC ###
     # st.title("무엇이든 물어보세요!")
@@ -295,7 +347,7 @@ def main():
     #     st.subheader(f'정답은??! {prediction}'.format(prediction))
     ###
 
-    ### Timeline MRC
+    ### Timeline MRC ###
     query = st.text_input('query를 입력하세요.')
 
     if query:
@@ -311,8 +363,11 @@ def main():
             json=data
         )
 
-        print('@@@@', response.json())
-        st.write('####', response.json())
+        print('@@@@', response.json()['outputs'])
+        st.write("관련 있는 문장은 다음과 같습니다.")
+        for text_result in response.json()['outputs']:
+            st.write(text_result[0], text_result[1])
+        # st.write('####', response.json()['outputs'])
     ###
   
 

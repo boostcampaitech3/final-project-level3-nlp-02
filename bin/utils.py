@@ -234,22 +234,18 @@ def dell_loop(text):
         return dell_loop(new_text)
 
 
-def get_split(text, tokenize_fn, n=3):
-    print('####split', text)
-    # text = ' '.join(text)
-    # print('####join', text)
+def get_split(talk_list, tokenize_fn, n=3):
 
-    min_len, max_len = 200, 1024
+    min_len, max_len = 200, 900
 
     # split_list = text.split('.') # 문서 .으로 나눠놓음
-    split_list = text
+    split_list = talk_list
     split_list_tokenize = [tokenize_fn(string) for string in split_list] # split_list 토큰화 함
     if sum([len(sp_t) for sp_t in split_list_tokenize]) < min_len:
-        return text
+        return [[talk_list, 0]]
     print('****split_list', len(split_list), split_list)
     # n개의 문장씩 문서를 묶음
     text_list = []
-    n = 3
     for i in range(len(split_list) - (n - 1)):
         text_list.append('. '.join(split_list[i:i+n]))
     
@@ -289,14 +285,18 @@ def get_split(text, tokenize_fn, n=3):
     sp = [0, len(split_list)] # splirt_point, 나누는 지점 [0, 159]
     done_split = []
     finished = []
+    record = []
     def make_split():
         nonlocal finished
         nonlocal sp
         nonlocal done_split
+        nonlocal record
+
+        print('sp', sp)
         _, point = s_similar.pop(0) # 가장 유사도 낮은 지점
         point += n # n개의 문장끼리 묶었으니 n 더해줘야 위치 맞음
         if point in done_split: # 나눠놓은 문장을 나누려고 하면 종료
-            # print('문장안 접근', point)
+            print('문장안 접근', point)
             return
 
         sp_c = sp[:] # sp_copy
@@ -305,12 +305,12 @@ def get_split(text, tokenize_fn, n=3):
         stick = sp_c.index(point) # 기준이 되는 인덱스 가져옴, 1
         up_p = sp_c[stick-1] # 기준점 위쪽의 문서들 시작 위치 0
         down_p = sp_c[stick+1] # 기준점 아래쪽의 문서들 끝 위치 159
-        # print("####up,down,point", up_p, down_p, point, sp_c)
+        print("####up,down,point", up_p, down_p, point, sp_c)
         up = split_list_tokenize[up_p:point]
         down = split_list_tokenize[point: down_p]
         up_len = sum([len(u_t) for u_t in up])
         down_len = sum([len(d_t) for d_t in down])
-        # print(up_len, down_len)
+        print('up_len, down_len', up_len, down_len)
         if up_len < min_len or down_len < min_len: # min_len 보다 작으면 자르지 않음
             return
         
@@ -318,12 +318,20 @@ def get_split(text, tokenize_fn, n=3):
         if up_len <= max_len: # min ~ max 이면 기록
             done_split += [p for p in range(up_p,point)]
             #finished.append([up_p, point])
+            print('## 기록 :', up_p, point, up_len)
+            record.append([up_p, point, up_len])
             finished.append([split_list[up_p:point], up_p])
+            record.sort(key = lambda x : x[0])
+            print('## record', record)
 
         if down_len <= max_len: # min ~ max 이면 기록
             done_split += [p for p in range(point,down_p)]
             #finished.append([point,down_p])
+            print('## 기록 :', point, down_p, down_len)
+            record.append([point, down_p, down_len])
             finished.append([split_list[point:down_p], point])
+            record.sort(key = lambda x : x[0])
+            print('## record', record)
 
     all_done = [i for i in range(len(split_list))]
     while True:

@@ -31,9 +31,9 @@ DOWNLOAD_FOLDER_PATH = "../../download/"
 #@st.cache
 # @st.cache(hash_funcs={torch.nn.parameter.Parameter: lambda _: None})
 def load_model():
-    model_ = BartForConditionalGeneration.from_pretrained('../kobart_summary') # minjun 기본
+    # model_ = BartForConditionalGeneration.from_pretrained('../kobart_summary') # minjun 기본
     #model_ = BartForConditionalGeneration.from_pretrained('../kobart_summary2_v_0') # minjun 합친거로 학습
-    # model_ = BartForConditionalGeneration.from_pretrained('../kobart_summary2_v_1') # minjun 합친거로 학습
+    model_ = BartForConditionalGeneration.from_pretrained('../kobart_summary2_v_1') # minjun 합친거로 학습
     #model_ = BartForConditionalGeneration.from_pretrained('../kobart_summary4') # younhye
     return model_
 
@@ -232,22 +232,25 @@ def get_summary(talk_list: list_check):
     discriminator, electra_tokenizer, fill_model = load_postprocess_model()
     _ = model_summary.eval()
     tokenizer = get_kobart_tokenizer()
-    print('!!!', talk_list)
 
-    split_text_list = get_split(talk_list, tokenizer.tokenize, n=3) # [[문단,0],[문단,21],[문단,46] ... ]
+    split_text_list = get_split(talk_list, tokenizer.tokenize, n=5) # [[문단,0],[문단,21],[문단,46] ... ]
     # print("## KoBART 요약 결과")
+    print(f'#### {len(split_text_list)} 개의 문단으로나눠짐')
+    print('#### split_text_list', split_text_list)
     outputs = ""
     for split_text in split_text_list:
-        sp_text = '. '.join(split_text[0])
+        sp_text = ' '.join(split_text[0])
         input_ids = tokenizer.encode(sp_text)
         input_ids = torch.tensor(input_ids)
         input_ids = input_ids.unsqueeze(0) # 이 길이가 1024개 까지만 들어간다.
+        print('##### input_ids.shape', input_ids.shape)
+        input_ids = input_ids.split(1024, dim=-1)[0] # get_split에서 자르지만 넘어갈 경우
 
         output = model_summary.generate(input_ids, eos_token_id=1, max_length=200, num_beams=5) # eos_token_id=1, max_length=100, num_beams=5)
         output = tokenizer.decode(output[0], skip_special_tokens=True)
         output = dell_loop(output)
         output = summary_post_processing(generated_summary=output, discriminator=discriminator, tokenizer=electra_tokenizer, fill_model=fill_model)
-        outputs += output.replace("'", "").replace(",", "") + "\n"
+        outputs += output.replace("'", "").replace(",", "") + ". "
         #st.write('요약')
         # print(output)
     # print("outputs:### ", outputs)
@@ -285,7 +288,7 @@ def get_summary2(talk_list: list_check):
         ## 후처리
         output = summary_post_processing(generated_summary=output, discriminator=discriminator, tokenizer=electra_tokenizer, fill_model=fill_model)
         outputs += output
-        
+    outputs = dell_loop(outputs)
     print("outputs1000:### ", outputs)
     # 유효하면 정상 링크 안내
     return JSONResponse(
@@ -302,7 +305,7 @@ def extract_keyword(talk_list: list_check):
     talk = talk_list.talk_list
     # print(talk)
     talk = ' '.join(talk)
-    print('!!!!', talk)
+    #print('!!!!', talk)
     outputs = get_keyword(talk)
 
     return JSONResponse(
