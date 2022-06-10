@@ -107,7 +107,6 @@ def collate_fn(batch):
 
 
 def processing(text):
-    # print("전처리 전:",text)
     # 그게 (0.1프로)(영 점 일 프로) 가정의 아이들과 가정의 모습이야?
     new_arr = []
     p = re.compile(r'(([(]([\w]|[\s]|[가-힣]|[.]|[-])+[)][/][(]([\w]|[\s]|[가-힣]|[.]|[-])+[)])|([(]([\w]|[\s]|[가-힣]|[.]|[-])+[)][(]([\w]|[\s]|[가-힣]|[.]|[-])+[)]))')
@@ -135,7 +134,6 @@ def processing(text):
                 t1, t2 = t1[1:-1], t2[1:-1]
 
                 if p3.match(t1) or p4.match(t1):
-                    # print(t1,"앞에 선택")
                     result.append(t2)
                 else:
                     result.append(t1)
@@ -143,7 +141,6 @@ def processing(text):
                 t1, t2 = token.split(')(')
                 t1, t2 = t1[1:], t2[:-1]
                 if p3.match(t1) or p4.match(t1):
-                    # print(t1,"앞에 선택")
                     result.append(t2)
                 else:
                     result.append(t1)
@@ -209,12 +206,9 @@ def dell_loop(text):
     new_text = text[:]
     text_ = text.split()
     arr = [i for i in range(len(text_)+1)]
-    #print(len(arr))
     can_list = [com for com in combinations(arr, 2) if com[1] - com[0] + 1 <= len(arr)-com[1]]
-    #print(can_list)
     for can in can_list:
         string = text_[can[0]:can[1]]
-        #print(string)
         stick = can[1]
         len_string = len(string)
         cnt = 0
@@ -243,7 +237,6 @@ def get_split(talk_list, tokenize_fn, n=3):
     split_list_tokenize = [tokenize_fn(string) for string in split_list] # split_list 토큰화 함
     if sum([len(sp_t) for sp_t in split_list_tokenize]) < min_len:
         return [[talk_list, 0]]
-    print('****split_list', len(split_list), split_list)
     # n개의 문장씩 문서를 묶음
     text_list = []
     for i in range(len(split_list) - (n - 1)):
@@ -263,23 +256,14 @@ def get_split(talk_list, tokenize_fn, n=3):
     tfidf_vectorizer=TfidfVectorizer(
         tokenizer=tokenize_fn, 
         ngram_range=(1, 2), 
-        #max_features=50000,
         )
-    print('####text_list', text_list)
     tfidfv=tfidf_vectorizer.fit(text_list)
     tfidf_matrix = tfidfv.transform(text_list)
-    #tfidf_matrix = tfidf_vectorizer.fit_transform(text_list)
-    # print(tfidf_matrix.shape) # 157, 4084
-    # print(tfidf_matrix[0].shape) # 1, 4084
-    #print(tfidfv.vocabulary_)
 
     # 문장묶음의 유사도 층정
     similar = []
     for idx, (front, back) in enumerate(zip(tfidf_matrix[:-n], tfidf_matrix[n:])):
         similar.append([(cosine_similarity(front, back)).item(),idx])
-    # print(similar)
-    # print(len(similar)) # 154
-
 
     s_similar = sorted(similar, key=lambda x : x[0])
     sp = [0, len(split_list)] # splirt_point, 나누는 지점 [0, 159]
@@ -292,11 +276,9 @@ def get_split(talk_list, tokenize_fn, n=3):
         nonlocal done_split
         nonlocal record
 
-        print('sp', sp)
         _, point = s_similar.pop(0) # 가장 유사도 낮은 지점
         point += n # n개의 문장끼리 묶었으니 n 더해줘야 위치 맞음
         if point in done_split: # 나눠놓은 문장을 나누려고 하면 종료
-            print('문장안 접근', point)
             return
 
         sp_c = sp[:] # sp_copy
@@ -305,45 +287,34 @@ def get_split(talk_list, tokenize_fn, n=3):
         stick = sp_c.index(point) # 기준이 되는 인덱스 가져옴, 1
         up_p = sp_c[stick-1] # 기준점 위쪽의 문서들 시작 위치 0
         down_p = sp_c[stick+1] # 기준점 아래쪽의 문서들 끝 위치 159
-        print("####up,down,point", up_p, down_p, point, sp_c)
         up = split_list_tokenize[up_p:point]
         down = split_list_tokenize[point: down_p]
         up_len = sum([len(u_t) for u_t in up])
         down_len = sum([len(d_t) for d_t in down])
-        print('up_len, down_len', up_len, down_len)
         if up_len < min_len or down_len < min_len: # min_len 보다 작으면 자르지 않음
             return
         
         sp = sp_c # point가 자를 수 있으니 sp_c를 sp로 할당
         if up_len <= max_len: # min ~ max 이면 기록
             done_split += [p for p in range(up_p,point)]
-            #finished.append([up_p, point])
-            print('## 기록 :', up_p, point, up_len)
             record.append([up_p, point, up_len])
             finished.append([split_list[up_p:point], up_p])
             record.sort(key = lambda x : x[0])
-            print('## record', record)
 
         if down_len <= max_len: # min ~ max 이면 기록
             done_split += [p for p in range(point,down_p)]
-            #finished.append([point,down_p])
-            print('## 기록 :', point, down_p, down_len)
             record.append([point, down_p, down_len])
             finished.append([split_list[point:down_p], point])
             record.sort(key = lambda x : x[0])
-            print('## record', record)
 
     all_done = [i for i in range(len(split_list))]
     while True:
-        #print(finished)
         done_split = sorted(done_split)
-        # print(len(done_split), len(all_done))
         if done_split == all_done:
             break
         make_split()
 
     finished.sort(key=lambda x : x[1])
-    # print(finished)
     return finished
 
 
@@ -353,7 +324,7 @@ def make_specific_link(youtube_link):
     if "youtu.be" not in youtube_link and "www.youtube.com" not in youtube_link:
         return False
     # 유효성 검사 완료
-    # else:    
+ 
     # 상세 주소 가져오기
     specific_link = youtube_link.split('/')[-1]
     # 링크 그대로 가져왔을 때 후처리
@@ -407,7 +378,6 @@ def get_tfidf_vec(input_list, tokenize_fn):
     tfidf_vectorizer=TfidfVectorizer(
         tokenizer=tokenize_fn, 
         ngram_range=(1, 2), 
-        #max_features=50000,
         )
     tfidfv=tfidf_vectorizer.fit(text_list)
     tfidf_matrix = tfidfv.transform(text_list)
@@ -419,10 +389,8 @@ def get_similar(query, tfidfv, tfidf_matrix, sec_text_list, top_n=5):
     질문과 가장 유사한 문장을 top-n개 뽑아서 리스트 형태로 반환
     '''
     q = tfidfv.transform(query)
-    #print(q.shape)
     similar_list = cosine_similarity(q, tfidf_matrix)[0]
     similar_list_argsort = similar_list.argsort()[::-1]
     result = [sec_text_list[i] for i in similar_list_argsort[:top_n]]
-    print(result)
     return result
 

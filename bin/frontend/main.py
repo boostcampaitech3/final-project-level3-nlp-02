@@ -2,31 +2,21 @@ from multiprocessing.spawn import prepare
 import streamlit as st
 import requests
 import time
-import re
 import os
 import yaml
 import librosa
 import sys
-# import pickle
 
-# from scipy.io import wavfile
 from streamlit_player import st_player
 from torch.utils.data.dataloader import DataLoader
-import torch
-import numpy as np
 from transformers import PreTrainedTokenizerFast, GPT2LMHeadModel
-# from kobart import get_kobart_tokenizer
-from transformers.models.bart import BartForConditionalGeneration
-# from konlpy.tag import Okt
-from itertools import combinations
-# from ..mrc_utils.func import MRC
 from PIL import Image
 
 # 상위 디렉토리에서 dataset 가져오기
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 from dataset import SplitOnSilenceDataset
 from asr_inference import Speech2Text
-from utils import collate_fn, processing, post_process, dell_loop, get_split
+from utils import collate_fn, post_process
 
 
 st.set_page_config(layout="wide")
@@ -75,7 +65,6 @@ def change_bool_state_true():
     st.session_state.push_stop_button = True
 
 
-# @st.cache()
 def verfity_link(url):
     data = {
         'url': url,
@@ -94,7 +83,6 @@ def verfity_link(url):
     return specific_url
 
 
-# @st.cache()
 def download_voice(specific_url):
     st_player(f"https://youtu.be/{specific_url}")
     data = {
@@ -109,7 +97,6 @@ def download_voice(specific_url):
     return
 
 
-# @st.cache(hash_funcs={torch.jit._script.RecursiveScriptModule : lambda _: None})
 def divide_data(specific_url, CONFIG_FILE):
     ### config file 설정 ###
     with open(CONFIG_FILE) as f:
@@ -142,7 +129,6 @@ def divide_data(specific_url, CONFIG_FILE):
             temp_words = ''
             for timeline, bat in zip(timelines, results):
                 pretty_time = f"{int(timeline)//60:02}:{int(timeline)%60:02}"
-                # words = post_process(bat[0])
 
                 # 한 음절이면 저장하고 continue
                 if len(bat[0].split()) == 1:
@@ -178,13 +164,11 @@ def divide_data(specific_url, CONFIG_FILE):
         end_time = time.time()
         print(f"Total time: {end_time - start_time}")
         print("JOB DONE!!!")
-        print('!!!!', results, type(results))
     
     st.write("STT 작업이 완료되었습니다.")
     return talk_list
 
 
-# @st.cache()
 def get_summary(talk_list):
     temp_talk_list = [talk[1] for talk in talk_list]
     data = {
@@ -197,13 +181,11 @@ def get_summary(talk_list):
         # url=f"{backend_address}/summary_before", # 1000자씩 끊기
         json=data
     )
-    # print('####', response.json())
     outputs = response.json()['outputs']
     st.write(outputs)
     return temp_talk_list
 
 
-# @st.cache()
 def set_keyword(temp_talk_list):
     data = {
         'talk_list': temp_talk_list,
@@ -218,7 +200,6 @@ def set_keyword(temp_talk_list):
     unique_keywords = list()
     for result in results:
         unique_keywords.extend(result[0].split())
-        # st.warning(' '.join(map(str, result)))
     
     str_keyword = ' '.join(map(str, list(set(unique_keywords))))
     st.warning(str_keyword)
@@ -252,39 +233,6 @@ def main():
     ### 안내 문구 ###
     st.write("강의 유튜브 링크를 넣어보세요!")
     st.write("시간대별 강의 자막을 보여주고, 키워드를 추출해주며, 요약해줍니다.")
-    ###
-
-    ### 음성파일 업로드 ###
-    # st.header("음성 파일을 올려주세요.")
-    # with st.spinner("wait"):
-    #     uploaded_file = st.file_uploader("Upload a file", type=["pcm", "wav", "flac", "m4a"])
-
-    # if uploaded_file:
-    #     audio_file = save_uploaded_file("audio", uploaded_file)
-
-    #     audio, rate = downsampling(audio_file)
-        
-    #     start_time = time.time()
-    #     print("JOB START!!!")
-
-    #     with open(CONFIG_FILE) as f:
-    #         config = yaml.load(f, Loader=yaml.FullLoader)
-
-    #     with st.spinner("STT 작업을 진행하고 있습니다"):
-    #         speech2text = Speech2Text(
-    #             asr_train_config=ASR_TRAIN_CONFIG, 
-    #             asr_model_file=ASR_MODEL_FILE, 
-    #             device='cuda',
-    #             dtype='float32',
-    #             **config
-    #             )
-
-    #         result = speech2text(audio)
-
-    #         st.write(result[0][0])
-
-    #     print(f"Total time: {time.time() - start_time}")
-    #     print("JOB DONE!!!")
     ###
 
     ### STT 유형, 링크 입력받기
@@ -368,20 +316,6 @@ def main():
     st.write('')
     ###
 
-    ### MRC ###
-    # st.title("무엇이든 물어보세요!")
-    
-    # query = st.text_input("질문을 입력해주세요")
-    # context = ' '.join(map(str, temp_talk_list))
-
-    # if query != '' and context != '':
-    #     prediction = MRC(query, context)
-
-
-    # if st.button("알려주세요!"):    
-    #     st.subheader(f'정답은??! {prediction}'.format(prediction))
-    ###
-
     ### Timeline MRC ###
     st.subheader('추출된 텍스트 내에서 검색할 키워드를 입력하세요.')
     query = st.text_input('', key='query')
@@ -391,15 +325,12 @@ def main():
             'question': [query],
             'talk_list': talk_list,
         }
-        print('#@!#@!', type(data), data)
-        # print('!@#!@#', data.question)
 
         response = requests.get(
             url=f"{backend_address}/query",
             json=data
         )
 
-        print('@@@@', response.json()['outputs'])
         st.write("관련 있는 타임라인은 다음과 같습니다.")
         for text_result in response.json()['outputs']:
             # text_result[0]: pretty time, 시간
@@ -416,8 +347,6 @@ def main():
                 st_player(f"https://youtu.be/{specific_url}&t={timeline}s")
             
             col2.write(text_result[1])
-
-        # st.write('####', response.json()['outputs'])
     ###
   
 
