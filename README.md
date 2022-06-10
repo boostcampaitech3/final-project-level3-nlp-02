@@ -4,6 +4,12 @@
 
 원하는 유튜브 영상을 STT를 통한 **text 추출** 및 **요약, 키워드 추출, MRC**를 지원하는 서비스입니다.
 
+## Members
+
+|                            강혜윤                            |                            고우진                            |                            김윤혜                            |                            윤주엽                            |                            이민준                            |
+| :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: | :----------------------------------------------------------: |
+| ![image](https://user-images.githubusercontent.com/48987027/172989959-38762e4e-a6d5-414c-b60e-171d9bc3fea4.png) | ![image](https://user-images.githubusercontent.com/48987027/172990102-1fca7411-6db7-4995-bacc-c656d128953c.png) | ![image](https://user-images.githubusercontent.com/48987027/172990193-a33b7b09-ce89-48bc-9718-ba9cdbcf5c8f.png) | ![image](https://user-images.githubusercontent.com/48987027/172989866-23cdebf1-cb29-451a-9451-c45d7442d378.png) | ![image](https://user-images.githubusercontent.com/48987027/172990006-2f60f1ee-475d-4ada-8926-9677c5463663.png) | <img src='https://avatars.githubusercontent.com/u/56633607?v=4' height=80 width=80px></img> |
+| [![Git Badge](http://img.shields.io/badge/-Github-black?style=flat-square&logo=github)](https://github.com/LeeYeonGeol) | [![Git Badge](http://img.shields.io/badge/-Github-black?style=flat-square&logo=github)](https://github.com/woojjn) | [![Git Badge](http://img.shields.io/badge/-Github-black?style=flat-square&logo=github)](https://github.com/nazzang49) | [![Git Badge](http://img.shields.io/badge/-Github-black?style=flat-square&logo=github)](https://github.com/goattier) | [![Git Badge](http://img.shields.io/badge/-Github-black?style=flat-square&logo=github)](https://github.com/hyewon11) | [![Git Badge](http://img.shields.io/badge/-Github-black?style=flat-square&logo=github)](https://github.com/AttractiveMinki) | [![Git Badge](http://img.shields.io/badge/-Github-black?style=flat-square&logo=github)](https://github.com/s1c5000) |
 
 ## 저장소 구조
 
