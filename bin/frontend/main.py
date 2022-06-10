@@ -185,7 +185,7 @@ def divide_data(specific_url, CONFIG_FILE):
 
 
 # @st.cache()
-def set_summary(talk_list):
+def get_summary(talk_list):
     temp_talk_list = [talk[1] for talk in talk_list]
     data = {
         'talk_list': temp_talk_list,
@@ -199,12 +199,12 @@ def set_summary(talk_list):
     )
     # print('####', response.json())
     outputs = response.json()['outputs']
-    st.info(outputs)
+    st.write(outputs)
     return temp_talk_list
 
 
 # @st.cache()
-def get_keyword(temp_talk_list):
+def set_keyword(temp_talk_list):
     data = {
         'talk_list': temp_talk_list,
     }
@@ -215,8 +215,13 @@ def get_keyword(temp_talk_list):
     )
 
     results = response.json()['outputs']
+    unique_keywords = list()
     for result in results:
-        st.warning(' '.join(map(str, result)))
+        unique_keywords.extend(result[0].split())
+        # st.warning(' '.join(map(str, result)))
+    
+    str_keyword = ' '.join(map(str, list(set(unique_keywords))))
+    st.warning(str_keyword)
     return
 
 
@@ -278,20 +283,25 @@ def main():
     ###
 
     ### STT 유형, 링크 입력받기
+    st.subheader("1. STT 방법을 선택해주세요.")
     choice_STT_mode = ['빠르게 STT', '정확하게 STT']
-    status = st.radio('1. 먼저 STT 방법 선택을 선택해주세요.', choice_STT_mode)
-
+    status = st.radio('', choice_STT_mode)
+    st.write('')
+    st.write('')
     if status == choice_STT_mode[0]:
         CONFIG_FILE = "/opt/ml/input/espnet-asr/conf/fast_decode_asr.yaml"
     elif status == choice_STT_mode[1]:
         CONFIG_FILE = "/opt/ml/input/espnet-asr/conf/decode_asr.yaml"
 
-    url = st.text_input("2. 유튜브 링크를 넣어주세요.", type="default")
+    st.subheader("2. 유튜브 링크를 넣어주세요.")
+    url = st.text_input("", type="default", key='youtube_link')
     # 텍스트 입력안내 문구
     if not url:
         st.write('유튜브 링크를 넣어주세요.')
         return
     ###
+    st.write('')
+    st.write('')
 
     ### 유튜브 링크 체크 ###
     specific_url = verfity_link(url)
@@ -327,13 +337,13 @@ def main():
     ### 요약하기 ###
     st.subheader("요약")
     with st.spinner('요약 작업을 진행하고 있어요'):
-        temp_talk_list = set_summary(talk_list)
+        temp_talk_list = get_summary(talk_list)
     ###
 
     ### 키워드 추출하기 ###
     st.subheader("Keywords")
     with st.spinner('키워드 추출을 진행하고 있어요'):
-        get_keyword(temp_talk_list)
+        set_keyword(temp_talk_list)
     ###
 
     ### MRC ###
@@ -352,7 +362,7 @@ def main():
 
     ### Timeline MRC ###
     st.subheader('검색할 키워드를 입력하세요.')
-    query = st.text_input('')
+    query = st.text_input('', key='query')
 
     if query:
         data = {
@@ -368,7 +378,7 @@ def main():
         )
 
         print('@@@@', response.json()['outputs'])
-        st.write("관련 있는 문장은 다음과 같습니다.")
+        st.write("관련 있는 타임라인은 다음과 같습니다.")
         for text_result in response.json()['outputs']:
             st.write(text_result[0], text_result[1])
         # st.write('####', response.json()['outputs'])
