@@ -249,6 +249,11 @@ def main():
         st.write()
     ###
 
+    ### 안내 문구 ###
+    st.write("강의 유튜브 링크를 넣어보세요!")
+    st.write("시간대별 강의 자막을 보여주고, 키워드를 추출해주며, 요약해줍니다.")
+    ###
+
     ### 음성파일 업로드 ###
     # st.header("음성 파일을 올려주세요.")
     # with st.spinner("wait"):
@@ -288,6 +293,9 @@ def main():
     status = st.radio('', choice_STT_mode)
     st.write('')
     st.write('')
+    st.write('')
+    st.write('')
+
     if status == choice_STT_mode[0]:
         CONFIG_FILE = "/opt/ml/input/espnet-asr/conf/fast_decode_asr.yaml"
     elif status == choice_STT_mode[1]:
@@ -297,9 +305,11 @@ def main():
     url = st.text_input("", type="default", key='youtube_link')
     # 텍스트 입력안내 문구
     if not url:
-        st.write('유튜브 링크를 넣어주세요.')
+        st.write('유튜브 링크를 넣고 엔터를 눌러주세요.')
         return
     ###
+    st.write('')
+    st.write('')
     st.write('')
     st.write('')
 
@@ -332,18 +342,30 @@ def main():
 
     ### 데이터 나누기 ###
     talk_list = divide_data(specific_url, CONFIG_FILE)
+    st.write('')
+    st.write('')
+    st.write('')
+    st.write('')
     ###
 
     ### 요약하기 ###
     st.subheader("요약")
     with st.spinner('요약 작업을 진행하고 있어요'):
         temp_talk_list = get_summary(talk_list)
+    st.write('')
+    st.write('')
+    st.write('')
+    st.write('')
     ###
 
     ### 키워드 추출하기 ###
     st.subheader("Keywords")
     with st.spinner('키워드 추출을 진행하고 있어요'):
         set_keyword(temp_talk_list)
+    st.write('')
+    st.write('')
+    st.write('')
+    st.write('')
     ###
 
     ### MRC ###
@@ -361,7 +383,7 @@ def main():
     ###
 
     ### Timeline MRC ###
-    st.subheader('검색할 키워드를 입력하세요.')
+    st.subheader('추출된 텍스트 내에서 검색할 키워드를 입력하세요.')
     query = st.text_input('', key='query')
 
     if query:
@@ -380,7 +402,21 @@ def main():
         print('@@@@', response.json()['outputs'])
         st.write("관련 있는 타임라인은 다음과 같습니다.")
         for text_result in response.json()['outputs']:
-            st.write(text_result[0], text_result[1])
+            # text_result[0]: pretty time, 시간
+            # text_result[1]: 문장
+            
+            # timeline 계산
+            min, second = text_result[0].split(':')
+            timeline = int(min) * 60 + int(second)
+
+            # st.columns
+            col1, col2 = st.columns([1, 1])
+            # 시간대별로 확장
+            with col1.expander(label=f"{text_result[0]}", expanded=False):
+                st_player(f"https://youtu.be/{specific_url}&t={timeline}s")
+            
+            col2.write(text_result[1])
+
         # st.write('####', response.json()['outputs'])
     ###
   
