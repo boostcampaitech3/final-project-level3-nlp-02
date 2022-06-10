@@ -363,7 +363,7 @@ def make_specific_link(youtube_link):
     return specific_link
 
 
-def summary_post_processing(generated_summary, discriminator, tokenizer, fill_model, threshold = 0.5):
+def summary_post_processing(generated_summary, discriminator, tokenizer, fill_model, threshold=0.6):
 
     generated_tokens = tokenizer.tokenize(generated_summary)
     generated_inputs = tokenizer.encode(generated_summary, return_tensors="pt")
