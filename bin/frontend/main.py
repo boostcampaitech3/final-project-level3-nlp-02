@@ -191,7 +191,6 @@ def set_summary(talk_list):
         'talk_list': temp_talk_list,
     }
 
-    st.write("요약 작업이 진행중입니다.")
     # 유튜브 음성파일을 가리키는 링크인지 확인하기.
     response = requests.get(
         url=f"{backend_address}/summary", # cos 유사도로 끊기
@@ -200,7 +199,7 @@ def set_summary(talk_list):
     )
     # print('####', response.json())
     outputs = response.json()['outputs']
-    st.write(outputs)
+    st.info(outputs)
     return temp_talk_list
 
 
@@ -217,7 +216,7 @@ def get_keyword(temp_talk_list):
 
     results = response.json()['outputs']
     for result in results:
-        st.write(','.join(map(str, result)))
+        st.warning(' '.join(map(str, result)))
     return
 
 
@@ -326,11 +325,15 @@ def main():
     ###
 
     ### 요약하기 ###
-    temp_talk_list = set_summary(talk_list)
+    st.subheader("요약")
+    with st.spinner('요약 작업을 진행하고 있어요'):
+        temp_talk_list = set_summary(talk_list)
     ###
 
     ### 키워드 추출하기 ###
-    get_keyword(temp_talk_list)
+    st.subheader("Keywords")
+    with st.spinner('키워드 추출을 진행하고 있어요'):
+        get_keyword(temp_talk_list)
     ###
 
     ### MRC ###
@@ -348,7 +351,8 @@ def main():
     ###
 
     ### Timeline MRC ###
-    query = st.text_input('query를 입력하세요.')
+    st.subheader('검색할 키워드를 입력하세요.')
+    query = st.text_input('')
 
     if query:
         data = {

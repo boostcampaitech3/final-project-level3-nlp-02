@@ -32,7 +32,7 @@ def get_candidates(text):
 def dist_keywords(doc_embedding, candidate_embeddings, candidates, top_n):
     distances = cosine_similarity(doc_embedding, candidate_embeddings)
     keywords = ['#'+candidates[index] for index in distances.argsort()[0][-top_n:]]
-    return ', '.join(keywords)
+    return ' '.join(keywords)
 
 
 def max_sum_sim(doc_embedding, candidate_embeddings, words, top_n, nr_candidates):
@@ -58,7 +58,7 @@ def max_sum_sim(doc_embedding, candidate_embeddings, words, top_n, nr_candidates
             min_sim = sim
     if candidate:
         keywords = ['#'+words_vals[idx] for idx in candidate]
-        return ', '.join(keywords)
+        return ' '.join(keywords)
     else:
         return "None"
 
@@ -97,6 +97,6 @@ def mmr(doc_embedding, candidate_embeddings, words, top_n, diversity):
     
     if keywords_idx:
         keywords = ['#'+words[idx] for idx in keywords_idx]
-        return ', '.join(keywords)
+        return ' '.join(keywords)
     else:
         return "None"

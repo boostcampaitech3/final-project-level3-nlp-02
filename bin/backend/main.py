@@ -31,9 +31,9 @@ DOWNLOAD_FOLDER_PATH = "../../download/"
 #@st.cache
 # @st.cache(hash_funcs={torch.nn.parameter.Parameter: lambda _: None})
 def load_model():
-    # model_ = BartForConditionalGeneration.from_pretrained('../kobart_summary') # minjun 기본
+    model_ = BartForConditionalGeneration.from_pretrained('../kobart_summary') # minjun 기본
     #model_ = BartForConditionalGeneration.from_pretrained('../kobart_summary2_v_0') # minjun 합친거로 학습
-    model_ = BartForConditionalGeneration.from_pretrained('../kobart_summary2_v_1') # minjun 합친거로 학습
+    # model_ = BartForConditionalGeneration.from_pretrained('../kobart_summary2_v_1') # minjun 합친거로 학습
     #model_ = BartForConditionalGeneration.from_pretrained('../kobart_summary4') # younhye
     return model_
 
@@ -250,7 +250,8 @@ def get_summary(talk_list: list_check):
         output = tokenizer.decode(output[0], skip_special_tokens=True)
         output = dell_loop(output)
         output = summary_post_processing(generated_summary=output, discriminator=discriminator, tokenizer=electra_tokenizer, fill_model=fill_model)
-        outputs += output.replace("'", "").replace(",", "") + ". "
+        output = output.replace("'", "").replace(",", "") + "\n\n"
+        outputs += output
         #st.write('요약')
         # print(output)
     # print("outputs:### ", outputs)
@@ -289,7 +290,19 @@ def get_summary2(talk_list: list_check):
         output = summary_post_processing(generated_summary=output, discriminator=discriminator, tokenizer=electra_tokenizer, fill_model=fill_model)
         outputs += output
     outputs = dell_loop(outputs)
+
+    if len(outputs) > 300:
+        # 요약의 요약
+        outputs = tokenizer.encode(outputs)
+        outputs = torch.tensor(outputs)
+        outputs = outputs.unsqueeze(0)
+        outputs = outputs.split(1024, dim=-1)[0]
+        outputs = model.generate(outputs, eos_token_id=1, max_length=300, num_beams=5)
+        outputs = tokenizer.decode(outputs[0], skip_special_tokens=True)
+        outputs = dell_loop(outputs)
+
     print("outputs1000:### ", outputs)
+
     # 유효하면 정상 링크 안내
     return JSONResponse(
         status_code=200,
