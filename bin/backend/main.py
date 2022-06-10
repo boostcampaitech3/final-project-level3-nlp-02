@@ -31,10 +31,10 @@ DOWNLOAD_FOLDER_PATH = "../../download/"
 #@st.cache
 # @st.cache(hash_funcs={torch.nn.parameter.Parameter: lambda _: None})
 def load_model():
-    model_ = BartForConditionalGeneration.from_pretrained('../kobart_summary') # minjun 기본
+    # model_ = BartForConditionalGeneration.from_pretrained('../kobart_summary') # minjun 기본
     #model_ = BartForConditionalGeneration.from_pretrained('../kobart_summary2_v_0') # minjun 합친거로 학습
     # model_ = BartForConditionalGeneration.from_pretrained('../kobart_summary2_v_1') # minjun 합친거로 학습
-    #model_ = BartForConditionalGeneration.from_pretrained('../kobart_summary4') # younhye
+    model_ = BartForConditionalGeneration.from_pretrained('../kobart_summary4') # younhye
     return model_
 
 def load_postprocess_model():
@@ -61,10 +61,10 @@ def get_keyword(text: str, top_n: int=10):
     results = list()
     results.append([dist_keywords(doc_embedding, candidate_embeddings, candidates, top_n=top_n)])
     results.append([max_sum_sim(doc_embedding, candidate_embeddings, candidates, top_n=top_n, nr_candidates=top_n*2)])
-    results.append([mmr(doc_embedding, candidate_embeddings, candidates, top_n=top_n, diversity=0.7)])
+    # results.append([mmr(doc_embedding, candidate_embeddings, candidates, top_n=top_n, diversity=0.7)])
     print(dist_keywords(doc_embedding, candidate_embeddings, candidates, top_n=top_n))
     print(max_sum_sim(doc_embedding, candidate_embeddings, candidates, top_n=top_n, nr_candidates=top_n*2))
-    print(mmr(doc_embedding, candidate_embeddings, candidates, top_n=top_n, diversity=0.7))
+    # print(mmr(doc_embedding, candidate_embeddings, candidates, top_n=top_n, diversity=0.7))
     return results
 
 
@@ -249,11 +249,24 @@ def get_summary(talk_list: list_check):
         output = model_summary.generate(input_ids, eos_token_id=1, max_length=200, num_beams=5) # eos_token_id=1, max_length=100, num_beams=5)
         output = tokenizer.decode(output[0], skip_special_tokens=True)
         output = dell_loop(output)
-        output = summary_post_processing(generated_summary=output, discriminator=discriminator, tokenizer=electra_tokenizer, fill_model=fill_model)
+        output = summary_post_processing(generated_summary=output, discriminator=discriminator, tokenizer=electra_tokenizer, fill_model=fill_model, threshold=0.6)
         output = output.replace("'", "").replace(",", "") + "\n\n"
         outputs += output
         #st.write('요약')
         # print(output)
+    outputs = dell_loop(outputs)
+
+    # if len(outputs) > 300:
+    #     # 요약의 요약
+    #     outputs = tokenizer.encode(outputs)
+    #     outputs = torch.tensor(outputs)
+    #     outputs = outputs.unsqueeze(0)
+    #     outputs = outputs.split(1024, dim=-1)[0]
+    #     outputs = model_summary.generate(outputs, eos_token_id=1, max_length=300, num_beams=5)
+    #     outputs = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    #     outputs = dell_loop(outputs)
+
+    #     outputs = outputs.replace(".", ".\n")
     # print("outputs:### ", outputs)
     # 유효하면 정상 링크 안내
     return JSONResponse(
@@ -287,19 +300,20 @@ def get_summary2(talk_list: list_check):
         output = tokenizer.decode(output[0], skip_special_tokens=True)
         output = dell_loop(output)
         ## 후처리
-        output = summary_post_processing(generated_summary=output, discriminator=discriminator, tokenizer=electra_tokenizer, fill_model=fill_model)
+        output = summary_post_processing(generated_summary=output, discriminator=discriminator, tokenizer=electra_tokenizer, fill_model=fill_model, threshold=0.6)
         outputs += output
     outputs = dell_loop(outputs)
 
-    if len(outputs) > 300:
-        # 요약의 요약
-        outputs = tokenizer.encode(outputs)
-        outputs = torch.tensor(outputs)
-        outputs = outputs.unsqueeze(0)
-        outputs = outputs.split(1024, dim=-1)[0]
-        outputs = model.generate(outputs, eos_token_id=1, max_length=300, num_beams=5)
-        outputs = tokenizer.decode(outputs[0], skip_special_tokens=True)
-        outputs = dell_loop(outputs)
+    # if len(outputs) > 300:
+    #     # 요약의 요약
+    #     outputs = tokenizer.encode(outputs)
+    #     outputs = torch.tensor(outputs)
+    #     outputs = outputs.unsqueeze(0)
+    #     outputs = outputs.split(1024, dim=-1)[0]
+    #     outputs = model_summary.generate(outputs, eos_token_id=1, max_length=300, num_beams=5)
+    #     outputs = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    #     outputs = dell_loop(outputs)
+    #     outputs = outputs.replace(".", ".\n")
 
     print("outputs1000:### ", outputs)
 
