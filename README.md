@@ -113,6 +113,8 @@ apt-get update && apt install default-jdk
 모델은 압축을 풀어 ~~/espnet-asr/bin 에 kobart_summary(frontend/main.py에 있는 load_model() 경로에 맞춰서)이라는 이름으로 넣습니다  
 모델 폴더 경로 : ~~/espnet-asr/bin/kobart_summary
 
+혹은, 다음 사이트를 방문하여 원하는 텍스트 후처리 모델을 다운로드하세요.
+https://plaid-raja-512.notion.site/4c07fd772e334dc9a3d7dbc4acd1bcce
 
 # 실행방법  
 shell의 cd 기능을 이용하여 다음 폴더로 이동한 뒤, 다음 명령어를 통해 실행시킵니다.  
