@@ -154,4 +154,4 @@ python main.py
 
 다음 링크에서 확인하실 수 있습니다.
 
-[https://plaid-raja-512.notion.site/Wrap-Up-Report-311465e6ff2b43838024148b774d8b9f](https://www.notion.so/Wrap-Up-Report-311465e6ff2b43838024148b774d8b9f)
+[https://plaid-raja-512.notion.site/Review-53fbb44d11dd45dbbc9a0de79a25353f](https://plaid-raja-512.notion.site/Review-53fbb44d11dd45dbbc9a0de79a25353f)
