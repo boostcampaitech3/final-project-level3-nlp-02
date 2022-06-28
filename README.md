@@ -15,6 +15,11 @@
 
 ```
 .
+├── STT_postprocessing          # STT 후처리
+│   ├── process.py
+│   ├── train.py
+│   └── train.sh
+│
 ├── bin
 │   ├── frontend
 │   │   ├── main.py
@@ -24,19 +29,33 @@
 │   ├── backend
 │   │   └── main.py
 │   │
-│   ├── models
-│   │   ├── postprocessing
-│   │   └── kobart_summary2_v_1
+│   ├── mrc_utils
+│   │   ├── __init__.py
+│   │   ├── arguments.py
+│   │   ├── func.py
+│   │   ├── model.py
+│   │   ├── trainer_qa.py
+│   │   └── utils_qa.py
 │   │   
 │   ├── asr_inference.py
 │   ├── dataset.py
 │   ├── key_bert.py
+│   ├── mrc_app.py
 │   └── utils.py
 │
-└── conf
-    ├── decode_asr.yaml
-    ├── fast_decode_asr.yaml
-    └── fast_decode_asr_ksponspeech.yaml
+├── conf
+│   ├── decode_asr.yaml
+│   ├── fast_decode_asr.yaml
+│   └── fast_decode_asr_ksponspeech.yaml
+│
+├── summarization
+│   └── preprocess.py
+│
+├── tools
+│   └── download_mdl.sh
+│
+└── vocab
+    └── aihub_labels.csv
 
 ```
 
