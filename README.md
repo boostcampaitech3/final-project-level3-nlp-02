@@ -93,6 +93,7 @@ apt-get update && apt install default-jdk
 ```
 
 ## 2. Downloading pre-train models
+STT 모델은 [hchung12/espnet-asr](https://github.com/hchung12/espnet-asr)을 이용했습니다.
 
 **ESPnet pre-train model with ksponspeech**을 다운로드 받으려면 다음을 실행하세요.
 
